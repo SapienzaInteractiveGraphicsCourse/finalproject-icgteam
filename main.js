@@ -18,39 +18,7 @@ document.onkeydown = function(event) {
 document.onkeyup = function(event) {
     keyDown[event.keyCode] = false;	
 }
-	// Function to check the control given in input from the user
-function checkUserInput(){
-	var codes = {'W' : 87,
-				 'A' : 65,
-				 'S' : 83,
-				 'D' : 68
-				};
-
-	if (keyDown[codes['W']]){		// Increase speed
-		if (speed < maxSpeed)			
-			speed += 0.01;
-	}		
-	else if (keyDown[codes['S']]){	// Decrease speed
-		if (speed > minSpeed)
-			speed -= 0.01;
-	}
-	else {							// Friction force
-		speed -= speed * 0.03;
-	}
-		
-	if (Math.abs(speed) > 0.02){	// Rotate vehicle
-		if (keyDown[codes['A']])
-			vehicle.rotation.y += Math.sign(speed) * 0.02;
-		if (keyDown[codes['D']])
-			vehicle.rotation.y -= Math.sign(speed) * 0.02;
-	}
-
-		// Translate vehicle
-	vehicle.position.x += speed * Math.sin(vehicle.rotation.y);
-	vehicle.position.z += speed * Math.cos(vehicle.rotation.y);
-
-}
-
+	
     // Renderer
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -70,6 +38,9 @@ camera.position.y = 4;
 camera.position.z = -7;
 scene.add(camera);
 
+	// Camera Controls
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.maxDistance = 9;
 
 	// Vehicle Controls
 var vehicle = new THREE.Object3D();;
@@ -100,10 +71,6 @@ loader.load("models/pony_cartoon/scene.gltf",
 			}
 );
 
-	// Camera Controls
-var controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.maxDistance = 9;
-
 	// Ground
 var ground = buildGround();
 scene.add(ground);
@@ -119,6 +86,14 @@ scene.add(sidewalk);
 	// lamps (not font of light)
 var lamps = buildSquareLamps();
 scene.add(lamps);
+
+	// Generate NiceDude
+var NNiceDudes = 10;
+var niceDudes = new Array(NNiceDudes);
+for (var i = 0; i < NNiceDudes; i++){
+	niceDudes[i] = new NiceDude(i, 0, i);
+	scene.add(niceDudes[i].group);
+}
 
 	// Demo light
 var light = new THREE.HemisphereLight(0xfffff0, 0x101020, 1.25);
