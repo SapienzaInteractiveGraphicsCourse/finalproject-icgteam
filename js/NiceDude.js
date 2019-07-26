@@ -1,5 +1,5 @@
 	// Classes for NiceDude
-function NiceDude(x, y, z){
+function NiceDude(x, y, z, theta){
 	this.group = new THREE.Group();
 
 		// Head
@@ -44,6 +44,7 @@ function NiceDude(x, y, z){
 
 		// Move the niceDude
 	this.group.position.set(x, y, z);
+	this.group.rotateY(theta);
 
 }
 

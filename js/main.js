@@ -88,11 +88,43 @@ var lamps = buildSquareLamps();
 scene.add(lamps);
 
 	// Generate NiceDude
-var NNiceDudes = 10;
+var NNiceDudes = nBlockX * nBlockZ;
 var niceDudes = new Array(NNiceDudes);
-for (var i = 0; i < NNiceDudes; i++){
-	niceDudes[i] = new NiceDude(i, 0, i);
-	scene.add(niceDudes[i].group);
+var i = 0;
+for (var r = -nBlockX/2; r < nBlockX/2; r++){
+	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
+			// Set the position at the center of the block
+		var x = r * blockSizeX + blockSizeX/2;
+		var y = 0.01;
+		var z = c * blockSizeZ + blockSizeZ/2;
+		var theta;
+			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
+			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
+		var side = Math.floor(Math.random() * 4);
+		var direction = Math.floor(Math.random()*2);
+		switch (side){
+			case 0:
+				z = z + blockSizeZ/2 - roadD/2 - sidewalkD/2;
+				theta = (direction ? +Math.PI/2 : -Math.PI/2);
+				break;
+			case 1:
+				x = x + blockSizeX/2 - roadW/2 - sidewalkW/2;
+				theta = (direction ? +Math.PI : 0);
+				break;
+			case 2:
+				z = z - blockSizeZ/2 + roadD/2 + sidewalkD/2;
+				theta = (direction ? -Math.PI/2 : +Math.PI/2);
+				break;
+			case 3:
+				x = x - blockSizeX/2 + roadW/2 + sidewalkW/2;
+				theta = (direction ? 0 : -Math.PI);
+				break;
+		}
+		niceDudes[i] = new NiceDude(x, y, z, theta);
+		scene.add(niceDudes[i].group);
+
+		i += 1;
+	}
 }
 
 	// Demo light
