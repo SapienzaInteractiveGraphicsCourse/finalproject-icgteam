@@ -6,13 +6,13 @@
 		</title>
 	</head>
 
-	<body>
+	<body style='margin: 0px;'>
 
 		<!--	Import the libreries 	-->
 		<script src="libs/three.min.js"></script>
 		<script src="libs/OrbitControls.js"></script>
 		<script src="libs/GLTFLoader.js"></script>
-		
+		<script src="libs/threex.windowresize.js"></script>
 
 		<!-- 	Controller for user input  		-->
 		<script src="js/Controls.js"></script> 
@@ -22,6 +22,21 @@
 
 		<!-- 	Hierarchical Model of a NiceDude	-->
 		<script src="js/NiceDude.js"></script> 
+
+		<label>Select background: </label>
+		<div>
+			<select id="backgroundSelect">
+				<option value="null">null</option>
+				<option value="Bridge2">Bridge2</option>
+				<option value="Escher">Escher</option>
+				<option value="mars">mars</option>
+				<option value="Park2">Park2</option>
+				<option value="Park3Med">Park3Med</option>
+				<option value="pisa">pisa</option>
+				<option value="skybox">skybox</option>
+				<option value="SwedishRoyalCastle">SwedishRoyalCastle</option>
+			</select>
+		</div>
 
 
 		<!-- 	Main script 	-->

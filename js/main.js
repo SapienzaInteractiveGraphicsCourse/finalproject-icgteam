@@ -14,12 +14,15 @@
     // HTML Listeners
 document.onkeydown = function(event) {
 	keyDown[event.keyCode] = true;
-}
+};
 document.onkeyup = function(event) {
     keyDown[event.keyCode] = false;	
-}
-	
-    // Renderer
+};
+document.getElementById("backgroundSelect").addEventListener("change", function(){
+	setBackground(document.getElementById("backgroundSelect").value);
+});
+
+	// Renderer
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -37,6 +40,21 @@ camera.position.x = 0;
 camera.position.y = 4;
 camera.position.z = -7;
 scene.add(camera);
+
+	// WindowResize lib to handle window resize
+var windowResize = new THREEx.WindowResize(renderer, camera);
+
+	// BackgroundSelector
+function setBackground(background){
+	if (background == 'null')
+		scene.background = null;
+	else{
+		var format = (background == 'pisa' ? '.png' : '.jpg');
+		var urls = ['px'+format, 'nx'+format, 'py'+format, 'ny'+format, 'pz'+format, 'nz'+format];
+
+		scene.background = new THREE.CubeTextureLoader().setPath('images/background/'+background+'/').load(urls);
+	}
+}
 
 	// Camera Controls
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -153,4 +171,6 @@ function animate() {
     // Render(scene, camera)
   	renderer.render(scene, camera);
   	
+
+
 }
