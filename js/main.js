@@ -98,6 +98,7 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 		var y = 0.01;
 		var z = c * blockSizeZ + blockSizeZ/2;
 		var theta;
+		var velocity;	// !!! TODO: Randomize velocity for animatyion  !!!
 			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
 			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
 		var side = Math.floor(Math.random() * 4);

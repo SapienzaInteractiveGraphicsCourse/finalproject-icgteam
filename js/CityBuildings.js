@@ -3,8 +3,8 @@ This is a support library that contatins all the directives
 to construct the buildings of the city.
 */
 
-var nBlockX = 10;
-var nBlockZ = 10;
+var nBlockX = 6;
+var nBlockZ = 6;
 var blockSizeX = 30;
 var blockSizeZ = 30;
 var roadW = 10;
@@ -12,12 +12,23 @@ var roadD = 10;
 var lampDensityW = 1;
 var lampDensityD = 1;
 var lampH = 3;
-var blockDensity= 20;
+var blockDensity = 5;
 var buildingMaxW = 15;
 var buildingMaxD = 15;
 var sidewalkW = 2;
 var sidewalkH = 0.1;
 var sidewalkD = 2;
+
+// Useful function to detect if a face is the BottomFace (uses normals)
+function isBottomFace(face){
+	if (face.normal.x != 0)
+		return false;
+	if (face.normal.y != -1)
+		return false;
+	if (face.normal.z != 0)
+		return false;
+	return true;
+}
 
 // Useful function to generate the texture
 function generateTextureCanvas(){
@@ -58,11 +69,20 @@ function generateTextureCanvas(){
 function createBaseBuilding(){
 		// Building
 	var geometry = new THREE.CubeGeometry( 1, 1, 1 );
-	geometry.uvsNeedUpdate = true;
-	
-	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
-		// Remove bottom face of the building
-	geometry.faces.splice( 6, 2 );
+	geometry.translate(0, 0.5, 0);
+
+		// Remove texture from top face
+	for (var i = 0; i < 3; i++){
+		geometry.faceVertexUvs[0][4][i].set(0, 0);
+		geometry.faceVertexUvs[0][5][i].set(0, 0);
+	}
+
+		// Replace the bottom face with a fake face
+	var fakeFace = geometry.faces[1];
+	for (var i = 0; i < geometry.faces.length; i++){
+		if (isBottomFace(geometry.faces[i]))
+			geometry.faces.splice(i, 1, fakeFace);
+	}
 
 	var meshBuilding = new THREE.Mesh( geometry );
 	return meshBuilding;
@@ -72,8 +92,10 @@ function createBaseBuilding(){
 function buildGround(){
 	// Ground
 	var geometry = new THREE.PlaneGeometry( 1, 1, 1 );
+	//var texture = new THREE.TextureLoader().load('images/road_road.jpg');
 	var material = new THREE.MeshLambertMaterial({
 		color : 0x222222
+		//map : texture
 	})
 	var ground  = new THREE.Mesh(geometry, material);
 	ground.scale.x = (nBlockX)*blockSizeX;
@@ -110,10 +132,10 @@ function buildPalaces(){
 	}
 
 	var buildingMesh = createBaseBuilding();
-    var cityGeometry = new THREE.Geometry();
+	var cityGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
 		for( var blockX = 0; blockX < nBlockX; blockX++){
-			for( var i = 0; i < blockDensity; i++){
+			for( var n = 0; n < blockDensity; n++){
 				// set position
 				buildingMesh.position.x = (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-sidewalkW);
 				buildingMesh.position.z = (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-sidewalkD);
