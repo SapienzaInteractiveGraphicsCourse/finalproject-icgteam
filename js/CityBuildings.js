@@ -68,7 +68,7 @@ function generateTextureCanvas(){
 // Return the basic building
 function createBaseBuilding(){
 		// Building
-	var geometry = new THREE.CubeGeometry( 1, 1, 1 );
+	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
 	geometry.translate(0, 0.5, 0);
 
 		// Remove texture from top face
@@ -84,53 +84,25 @@ function createBaseBuilding(){
 			geometry.faces.splice(i, 1, fakeFace);
 	}
 
-	var meshBuilding = new THREE.Mesh( geometry );
-	return meshBuilding;
+	//var meshBuilding = new Physijs.BoxMesh( geometry );
+	return geometry;
 }
 
-// Return the ground mesh
+// Return the ground geometry
 function buildGround(){
-	// Ground
 	var geometry = new THREE.PlaneGeometry( 1, 1, 1 );
+	geometry.scale(nBlockX*blockSizeX, nBlockZ*blockSizeZ, 1);
+	geometry.lookAt(new THREE.Vector3(0,1,0));
 	//var texture = new THREE.TextureLoader().load('images/road_road.jpg');
-	var material = new THREE.MeshLambertMaterial({
-		color : 0x222222
-		//map : texture
-	})
-	var ground  = new THREE.Mesh(geometry, material);
-	ground.scale.x = (nBlockX)*blockSizeX;
-	ground.scale.y = (nBlockZ)*blockSizeZ;
-	ground.lookAt(new THREE.Vector3(0,1,0));
+	
+	var material = new Physijs.createMaterial(new THREE.MeshLambertMaterial({ color : 0x222222}), 0.8, 0.3);
+	var ground = new Physijs.PlaneMesh(geometry, material, 0);
 
 	return ground;
 }
 
 // Return the mesh containing all palaces meshes
 function buildPalaces(){
-
-	// base colors for vertexColors. light is for vertices at the top, shaddow is for the ones at the bottom
-	function colorifyBuilding(buildingMesh){
-		var light = new THREE.Color( 0xffffff );
-		var shadow  = new THREE.Color( 0x303050 );
-			// establish the base color for the buildingMesh
-		var value = 1 - Math.random() * Math.random();
-		var baseColor = new THREE.Color().setRGB( value + Math.random() * 0.1, value, value + Math.random() * 0.1 );
-			// set topColor/bottom vertexColors as adjustement of baseColor
-		var topColor  = baseColor.clone().multiply( light );
-		var bottomColor = baseColor.clone().multiply( shadow );
-			// set .vertexColors for each face
-		var geometry  = buildingMesh.geometry;    
-		for ( var j = 0, jl = geometry.faces.length; j < jl; j ++ ) {
-			if ( j === 2 ) {
-				// set face.vertexColors on root face
-				geometry.faces[ j ].vertexColors = [ baseColor, baseColor, baseColor, baseColor ];
-			} else {
-				// set face.vertexColors on sides faces
-				geometry.faces[ j ].vertexColors = [ topColor, bottomColor, bottomColor, topColor ];
-			}
-		}   
-	}
-
 	var buildingMesh = createBaseBuilding();
 	var cityGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
@@ -146,10 +118,8 @@ function buildPalaces(){
 
 				// put a random scale
 				buildingMesh.scale.x = Math.min(Math.random() * 5 + 10, buildingMaxW);
-				buildingMesh.scale.y = (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 4;
+				buildingMesh.scale.y = 10;//(Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 4;
 				buildingMesh.scale.z = Math.min(buildingMesh.scale.x, buildingMaxD)
-
-				//colorifyBuilding(buildingMesh);
 
 				// merge it with cityGeometry - very important for performance
 				buildingMesh.updateMatrix();
@@ -163,44 +133,50 @@ function buildPalaces(){
 	buildingTexture.needsUpdate = true;
 
     // build the city Mesh
-    var material  = new THREE.MeshLambertMaterial({
-    	//color : 0x00ff00,
-    	map : buildingTexture,
-    	vertexColors  : THREE.VertexColors
-    });
-    var cityMesh = new THREE.Mesh( cityGeometry, material );
+    var material  = new Physijs.createMaterial( new THREE.MeshLambertMaterial({
+						    	map : buildingTexture,
+						    	vertexColors  : THREE.VertexColors
+						    }));
+    var cityMesh = new Physijs.Mesh( cityGeometry, material );
     return cityMesh;
 }
 
 function buildSidewalk(){
-	var buildingMesh = createBaseBuilding();
-    var sidewalksGeometry = new THREE.Geometry();
+    //var sidewalksGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
       for( var blockX = 0; blockX < nBlockX; blockX++){
-        // set position
-        buildingMesh.position.x = (blockX+0.5-nBlockX/2)*blockSizeX;
-        buildingMesh.position.z = (blockZ+0.5-nBlockZ/2)*blockSizeZ;
+		var buildingGeometry = createBaseBuilding();
 
-        buildingMesh.scale.x  = blockSizeX-roadW;
-        buildingMesh.scale.y  = sidewalkH;
-        buildingMesh.scale.z  = blockSizeZ-roadD;
+        // set position
+        buildingGeometry.translate((blockX+0.5-nBlockX/2)*blockSizeX, 0, (blockZ+0.5-nBlockZ/2)*blockSizeZ);
+        //buildingMesh.position.x = (blockX+0.5-nBlockX/2)*blockSizeX;
+        //buildingMesh.position.z = (blockZ+0.5-nBlockZ/2)*blockSizeZ;
+
+        buildingGeometry.scale(blockSizeX-roadW, sidewalkH, blockSizeZ-roadD);
+        //buildingMesh.scale.x = blockSizeX-roadW;
+        //buildingMesh.scale.y = sidewalkH;
+        //buildingMesh.scale.z = blockSizeZ-roadD;
 
         // merge it with cityGeometry - very important for performance
-        buildingMesh.updateMatrix();
-        sidewalksGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );         
+        //buildingMesh.updateMatrix();
+        //sidewalksGeometry.merge( buildingMesh.geometry, buildingMesh.matrix ); 
+
+            // build the mesh
+    	var material  = new Physijs.createMaterial( new THREE.MeshLambertMaterial({
+     		color : 0x444444
+    	}));        
+    	var sidewalkMesh = new Physijs.BoxMesh(buildingGeometry, material );
+    	scene.add(sidewalkMesh);
+    
       }
     }   
-    // build the mesh
-    var material  = new THREE.MeshLambertMaterial({
-      color : 0x444444
-    });
-    var sidewalksMesh = new THREE.Mesh(sidewalksGeometry, material );
-    return sidewalksMesh;
+
+    //return sidewalksMesh;
 }
 
 function buildSquareLamps(){
 
-	// Useful functino to add a single lamp
+	// Useful function to add a single lamp
 	function addLamp(position){
 		var lightPosition = position.clone();
 		lightPosition.y = sidewalkH+lampH+0.1;

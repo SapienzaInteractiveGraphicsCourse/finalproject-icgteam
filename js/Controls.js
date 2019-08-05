@@ -1,3 +1,9 @@
+// Array used for controls
+var keyDown = new Array();
+for (var i = 0; i < 300; i++) {
+    keyDown[i] = false;
+}
+
 // Function to check the control given in input from the user
 function checkUserInput(){
 	var codes = {'W' : 87,
@@ -7,8 +13,10 @@ function checkUserInput(){
 				};
 
 	if (keyDown[codes['W']]){		// Increase speed
-		if (speed < maxSpeed)			
+		if (speed < maxSpeed){			
+			//vehicle.applyEngineForce(300);
 			speed += 0.01;
+		}
 	}		
 	else if (keyDown[codes['S']]){	// Decrease speed
 		if (speed > minSpeed)
