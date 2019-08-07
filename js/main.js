@@ -58,7 +58,7 @@ function setBackground(background){
 
 	// Camera Controls
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.maxDistance = 9;
+controls.maxDistance = 15;
 
 	// Vehicle Controls
 var vehicle = new THREE.Object3D();;
@@ -94,8 +94,8 @@ var ground = buildGround();
 scene.add(ground);
 
 	// Palaces
-var palaces = buildPalaces();
-scene.add(palaces);
+//var palaces = buildPalaces();
+//scene.add(palaces);
 
 	// Sidewalks
 var sidewalk = buildSidewalk();
@@ -108,19 +108,21 @@ scene.add(lamps);
 	// Generate NiceDude
 var NNiceDudes = nBlockX * nBlockZ;
 var niceDudes = new Array(NNiceDudes);
+var niceDudesDirections = new Array(NNiceDudes);
 var i = 0;
 for (var r = -nBlockX/2; r < nBlockX/2; r++){
 	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
 			// Set the position at the center of the block
 		var x = r * blockSizeX + blockSizeX/2;
-		var y = 0.01;
+		var y = 0;
 		var z = c * blockSizeZ + blockSizeZ/2;
 		var theta;
-		var velocity;	// !!! TODO: Randomize velocity for animatyion  !!!
-			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
+			// Randomize the side of the sidewalk (0:N, 1:E, 2:S, 3:O)
 			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
+		var Xc = x;
+		var Zc = z;
 		var side = Math.floor(Math.random() * 4);
-		var direction = Math.floor(Math.random()*2);
+		var direction = Math.floor(Math.random() * 2);
 		switch (side){
 			case 0:
 				z = z + blockSizeZ/2 - roadD/2 - sidewalkD/2;
@@ -136,10 +138,10 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 				break;
 			case 3:
 				x = x - blockSizeX/2 + roadW/2 + sidewalkW/2;
-				theta = (direction ? 0 : -Math.PI);
+				theta = (direction ? 0 : +Math.PI);
 				break;
 		}
-		niceDudes[i] = new NiceDude(x, y, z, theta);
+		niceDudes[i] = new NiceDude(x, y, z, theta, Xc, Zc);
 		scene.add(niceDudes[i].group);
 
 		i += 1;
@@ -167,6 +169,10 @@ function animate() {
 	controls.target.y = vehicle.position.y + 2.8;
 	controls.target.z = vehicle.position.z;
 	controls.update();
+
+	// NiceDudes Animation
+	for (var i = 0; i < NNiceDudes; i++)
+		niceDudes[i].animate();
 
     // Render(scene, camera)
   	renderer.render(scene, camera);

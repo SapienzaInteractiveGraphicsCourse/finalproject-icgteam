@@ -1,5 +1,5 @@
 	// Classes for NiceDude
-function NiceDude(x, y, z, theta){
+function NiceDude(x, y, z, theta, Xc, Zc){
 	this.group = new THREE.Group();
 
 		// Head
@@ -42,10 +42,51 @@ function NiceDude(x, y, z, theta){
 	this.rightShoe = new Shoe("R");
 	this.group.add(this.rightShoe.mesh);
 
-		// Move the niceDude
+		// Direction of the movement
+	this.direction = new THREE.Vector3(1, 0, 0);
+	this.step = 0.006 + 0.001*(Math.floor(Math.random() * 6));
+
+		// Place the niceDude
 	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
 
+		// Center of the block
+	this.Xc = Xc;
+	this.Zc = Zc;
+
+		// 4 lamps position
+	this.lamps = new Array(4);
+	this.lamps[0] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[0].x += -blockSizeX/2 -roadW/2 -sidewalkW/2;
+	this.lamps[0].z += -blockSizeZ/2 -roadD/2 -sidewalkD/2;
+	
+	this.lamps[1] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[1].x += +blockSizeX/2 +roadW/2 +sidewalkW/2;
+	this.lamps[1].z += -blockSizeZ/2 -roadD/2 -sidewalkD/2;
+
+	this.lamps[2] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[2].x += -blockSizeX/2 -roadW/2 -sidewalkW/2;
+	this.lamps[2].z += +blockSizeZ/2 +roadD/2 +sidewalkD/2;
+
+	this.lamps[3] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[3].x += +blockSizeX/2 +roadW/2 +sidewalkW/2;
+	this.lamps[3].z += +blockSizeZ/2 +roadD/2 +sidewalkD/2;
+
+	
+	for (var i = 0; i < 4; i++){
+		var g = new THREE.BoxGeometry(1, 1, 1);
+		var m = new THREE.MeshBasicMaterial();
+		var mm = new THREE.Mesh(g, m);
+		mm.position.set(this.lamps[i].x, 0, this.lamps[i].z);
+		scene.add(mm);
+	}
+	
+	var g = new THREE.BoxGeometry(1, 1, 1);
+	var m = new THREE.MeshBasicMaterial();
+	var mm = new THREE.Mesh(g, m);
+	mm.position.set(this.Xc, 0, this.Zc);
+	scene.add(mm);
+	
 }
 
 function Head(){
@@ -99,7 +140,6 @@ function Body(){
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
 }
 
-
 function Shoulder(label){
 	var shoulderRadius = 0.1;
 	var shoulderPositionX = 0 + (label == 'L' ? 0.2 : -0.2);	
@@ -120,8 +160,7 @@ function Shoulder(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xff8c33} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
-	
-	}
+}
 
 function Arm(label){
 	var armRadius = 0.07;
@@ -181,4 +220,25 @@ function Shoe(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0x402c11} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+}
+
+NiceDude.prototype.isNearLamp = function(lamp) {
+	if ((lamp.x-0.5 < this.group.position.x) &&
+		(this.group.position.x < lamp.x+0.5) && 
+		(lamp.z-0.5 < this.group.position.z) &&
+		(this.group.position.z < lamp.z+0.5))
+			return true;
+	return false;
+}
+
+NiceDude.prototype.animate = function() {
+	this.group.translateZ(this.step);
+	
+		// Check niceDude position to avoid lamps
+	for (var i = 0; i < 4; i++){
+		console.log(this);
+		console.log(this.lamps[i]);
+		if (this.isNearLamp(this.lamps[i]));
+			this.group.rotateY(Math.PI);
+	}
 }
