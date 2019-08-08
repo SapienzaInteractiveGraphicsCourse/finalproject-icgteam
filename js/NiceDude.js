@@ -1,5 +1,5 @@
 	// Classes for NiceDude
-function NiceDude(x, y, z, theta, Xc, Zc){
+function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.group = new THREE.Group();
 
 		// Head
@@ -42,14 +42,6 @@ function NiceDude(x, y, z, theta, Xc, Zc){
 	this.rightShoe = new Shoe("R");
 	this.group.add(this.rightShoe.mesh);
 
-		// Direction of the movement
-	this.direction = new THREE.Vector3(1, 0, 0);
-	this.step = 0.006 + 0.001*(Math.floor(Math.random() * 6));
-
-		// Place the niceDude
-	this.group.position.set(x, y, z);
-	this.group.rotateY(theta);
-
 		// Center of the block
 	this.Xc = Xc;
 	this.Zc = Zc;
@@ -57,22 +49,34 @@ function NiceDude(x, y, z, theta, Xc, Zc){
 		// 4 lamps position
 	this.lamps = new Array(4);
 	this.lamps[0] = new THREE.Vector3(Xc, 0, Zc);
-	this.lamps[0].x += -blockSizeX/2 -roadW/2 -sidewalkW/2;
-	this.lamps[0].z += -blockSizeZ/2 -roadD/2 -sidewalkD/2;
+	this.lamps[0].x += -blockSizeX/2 +roadW/2 +sidewalkW/2;
+	this.lamps[0].z += -blockSizeZ/2 +roadD/2 +sidewalkD/2;
 	
 	this.lamps[1] = new THREE.Vector3(Xc, 0, Zc);
-	this.lamps[1].x += +blockSizeX/2 +roadW/2 +sidewalkW/2;
-	this.lamps[1].z += -blockSizeZ/2 -roadD/2 -sidewalkD/2;
+	this.lamps[1].x += +blockSizeX/2 -roadW/2 -sidewalkW/2;
+	this.lamps[1].z += -blockSizeZ/2 +roadD/2 +sidewalkD/2;
 
 	this.lamps[2] = new THREE.Vector3(Xc, 0, Zc);
-	this.lamps[2].x += -blockSizeX/2 -roadW/2 -sidewalkW/2;
-	this.lamps[2].z += +blockSizeZ/2 +roadD/2 +sidewalkD/2;
+	this.lamps[2].x += -blockSizeX/2 +roadW/2 +sidewalkW/2;
+	this.lamps[2].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
 
 	this.lamps[3] = new THREE.Vector3(Xc, 0, Zc);
-	this.lamps[3].x += +blockSizeX/2 +roadW/2 +sidewalkW/2;
-	this.lamps[3].z += +blockSizeZ/2 +roadD/2 +sidewalkD/2;
+	this.lamps[3].x += +blockSizeX/2 -roadW/2 -sidewalkW/2;
+	this.lamps[3].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
+		
+		// Place the niceDude
+	this.group.position.set(x, y, z);
+	this.group.rotateY(theta);
 
+		// Velocity and direction of the animation
+	this.step = 0.006 + 0.001*(Math.floor(Math.random() * 6));
+	this.direction = (direction == 0 ? -1 : +1);	// 0: clockwise, 1: anticlockwise
+
+		// Avoiding Lamps
+	this.targetLamp = undefined;
+	this.avoidingLamp = false;
 	
+	/*
 	for (var i = 0; i < 4; i++){
 		var g = new THREE.BoxGeometry(1, 1, 1);
 		var m = new THREE.MeshBasicMaterial();
@@ -86,7 +90,7 @@ function NiceDude(x, y, z, theta, Xc, Zc){
 	var mm = new THREE.Mesh(g, m);
 	mm.position.set(this.Xc, 0, this.Zc);
 	scene.add(mm);
-	
+	*/	
 }
 
 function Head(){
@@ -192,7 +196,6 @@ function Leg(label){
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
 }
 
-
 function Shoe(label){
 	var shoeRadius = 0.12;
 	var shoeScaleX = 0.7;
@@ -223,22 +226,44 @@ function Shoe(label){
 }
 
 NiceDude.prototype.isNearLamp = function(lamp) {
-	if ((lamp.x-0.5 < this.group.position.x) &&
-		(this.group.position.x < lamp.x+0.5) && 
-		(lamp.z-0.5 < this.group.position.z) &&
-		(this.group.position.z < lamp.z+0.5))
-			return true;
+	var offset = 1.0;
+	
+	var position = this.group.position;
+	var Xmin = lamp.x - offset;
+	var Xmax = lamp.x + offset;
+	var Zmin = lamp.z - offset;
+	var Zmax = lamp.z + offset;
+	
+	if ( position.x < Xmax && 
+		 position.x > Xmin && 
+		 position.z < Zmax &&
+		 position.z > Zmin )
+		return true;
+
 	return false;
 }
 
 NiceDude.prototype.animate = function() {
 	this.group.translateZ(this.step);
-	
+		
 		// Check niceDude position to avoid lamps
-	for (var i = 0; i < 4; i++){
-		console.log(this);
-		console.log(this.lamps[i]);
-		if (this.isNearLamp(this.lamps[i]));
-			this.group.rotateY(Math.PI);
+	if (!this.avoidingLamp){
+		for (var i = 0; i < 4; i++){
+			if (this.isNearLamp(this.lamps[i])){
+				// Rotate behind on the same sidewalk
+				//this.group.rotateY(Math.PI);
+					// 		or
+				// Rotate to sidewalk
+				this.targetLamp = this.lamps[i];
+				this.avoidingLamp = true;
+				this.group.rotateY(this.direction * Math.PI/4);
+			}
+		}
+	}
+	else if (!(this.isNearLamp(this.targetLamp))){
+		this.group.rotateY(this.direction * Math.PI/4);
+		this.targetLamp = undefined;
+		this.avoidingLamp = false;
 	}
 }
+

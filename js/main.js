@@ -94,8 +94,8 @@ var ground = buildGround();
 scene.add(ground);
 
 	// Palaces
-//var palaces = buildPalaces();
-//scene.add(palaces);
+var palaces = buildPalaces();
+scene.add(palaces);
 
 	// Sidewalks
 var sidewalk = buildSidewalk();
@@ -108,7 +108,6 @@ scene.add(lamps);
 	// Generate NiceDude
 var NNiceDudes = nBlockX * nBlockZ;
 var niceDudes = new Array(NNiceDudes);
-var niceDudesDirections = new Array(NNiceDudes);
 var i = 0;
 for (var r = -nBlockX/2; r < nBlockX/2; r++){
 	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
@@ -141,9 +140,9 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 				theta = (direction ? 0 : +Math.PI);
 				break;
 		}
-		niceDudes[i] = new NiceDude(x, y, z, theta, Xc, Zc);
+		niceDudes[i] = new NiceDude(x, y, z, theta, direction, Xc, Zc);
 		scene.add(niceDudes[i].group);
-
+	
 		i += 1;
 	}
 }
@@ -169,10 +168,10 @@ function animate() {
 	controls.target.y = vehicle.position.y + 2.8;
 	controls.target.z = vehicle.position.z;
 	controls.update();
-
+	
 	// NiceDudes Animation
 	for (var i = 0; i < NNiceDudes; i++)
-		niceDudes[i].animate();
+			niceDudes[i].animate();
 
     // Render(scene, camera)
   	renderer.render(scene, camera);
