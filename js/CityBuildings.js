@@ -40,6 +40,7 @@ function generateTextureCanvas(){
 	// plain it in white
 	context.fillStyle = '#ffffff';
 	context.fillRect( 0, 0, 32, 64 );
+	/*
 	// draw the window rows - with a small noise to simulate light variations in each room
 	for( var y = 2; y < 64; y += 2 ){
 		for( var x = 0; x < 32; x += 2 ){
@@ -48,7 +49,7 @@ function generateTextureCanvas(){
 			context.fillRect( x, y, 2, 1 );
 		}
 	}
-
+*/
 	// build a bigger canvas and copy the small one in it
 	// This is a trick to upscale the texture without filtering
 	var canvas2 = document.createElement( 'canvas' );
@@ -92,11 +93,12 @@ function createBaseBuilding(){
 function buildGround(){
 	// Ground
 	var geometry = new THREE.PlaneGeometry( 1, 1, 1 );
-	//var texture = new THREE.TextureLoader().load('images/road_road.jpg');
-	var material = new THREE.MeshLambertMaterial({
-		color : 0x222222
-		//map : texture
-	})
+	var texture = new THREE.TextureLoader().load( "./images/road_road.jpg");
+
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set( 4, 4 );
+var material = new THREE.MeshBasicMaterial( { map: texture } );
 	var ground  = new THREE.Mesh(geometry, material);
 	ground.scale.x = (nBlockX)*blockSizeX;
 	ground.scale.y = (nBlockZ)*blockSizeZ;
@@ -107,7 +109,13 @@ function buildGround(){
 
 // Return the mesh containing all palaces meshes
 function buildPalaces(){
+	var texture = new THREE.TextureLoader().load('images/windows.jpg');
+		var material  = new THREE.PointsMaterial({
+		map : texture,
+		size : 7,
+		transparent : true,
 
+		});
 	// base colors for vertexColors. light is for vertices at the top, shaddow is for the ones at the bottom
 	function colorifyBuilding(buildingMesh){
 		var light = new THREE.Color( 0xffffff );
@@ -119,7 +127,7 @@ function buildPalaces(){
 		var topColor  = baseColor.clone().multiply( light );
 		var bottomColor = baseColor.clone().multiply( shadow );
 			// set .vertexColors for each face
-		var geometry  = buildingMesh.geometry;    
+		var geometry  = buildingMesh.geometry;
 		for ( var j = 0, jl = geometry.faces.length; j < jl; j ++ ) {
 			if ( j === 2 ) {
 				// set face.vertexColors on root face
@@ -128,7 +136,7 @@ function buildPalaces(){
 				// set face.vertexColors on sides faces
 				geometry.faces[ j ].vertexColors = [ topColor, bottomColor, bottomColor, topColor ];
 			}
-		}   
+		}
 	}
 
 	var buildingMesh = createBaseBuilding();
@@ -153,19 +161,25 @@ function buildPalaces(){
 
 				// merge it with cityGeometry - very important for performance
 				buildingMesh.updateMatrix();
-				cityGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );          
+				cityGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );
 			}
-		}   
+		}
     }
-    
+/*
 	var buildingTexture = new THREE.Texture( generateTextureCanvas() );
 	buildingTexture.anisotropy  = renderer.capabilities.getMaxAnisotropy();
 	buildingTexture.needsUpdate = true;
-
+*/
+	var texture = new THREE.TextureLoader().load( "./images/windows.jpg" );
+		var material = new THREE.PointsMaterial({
+		map : texture,
+		size : 8,
+		transparent : true
+		});
     // build the city Mesh
     var material  = new THREE.MeshLambertMaterial({
     	//color : 0x00ff00,
-    	map : buildingTexture,
+    	map : texture,
     	vertexColors  : THREE.VertexColors
     });
     var cityMesh = new THREE.Mesh( cityGeometry, material );
@@ -187,13 +201,14 @@ function buildSidewalk(){
 
         // merge it with cityGeometry - very important for performance
         buildingMesh.updateMatrix();
-        sidewalksGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );         
+        sidewalksGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );
       }
-    }   
-    // build the mesh
-    var material  = new THREE.MeshLambertMaterial({
-      color : 0x444444
-    });
+    }
+
+		var material = new THREE.MeshBasicMaterial({
+            color  : 0x262626
+        });
+
     var sidewalksMesh = new THREE.Mesh(sidewalksGeometry, material );
     return sidewalksMesh;
 }
@@ -209,58 +224,58 @@ function buildSquareLamps(){
 		lightPosition.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
 
 		lightsGeometry.vertices.push( lightPosition );
-		
+
 		// set head position
 		lampMesh.position.copy(position);
 		lampMesh.position.y = sidewalkH+lampH;
-		// add poll offset        
+		// add poll offset
 		lampMesh.scale.set(0.2,0.2,0.2);
 		// colorify
 		for(var i = 0; i < lampMesh.geometry.faces.length; i++ ) {
 			lampMesh.geometry.faces[i].color.set( 'white' );
-		}         
-		// set position for block
-		lampMesh.position.x += (blockX+0.5-nBlockX/2)*blockSizeX;
-		lampMesh.position.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-		// merge it with cityGeometry - very important for performance
-		lampMesh.updateMatrix();
-		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix ); 
-		    
-		// set pole position
-		lampMesh.position.copy(position);
-		lampMesh.position.y += sidewalkH;
-		// add pole offset        
-		lampMesh.scale.set(0.1,lampH,0.1);
-		// colorify
-		for(var i = 0; i < lampMesh.geometry.faces.length; i++ ) {
-			lampMesh.geometry.faces[i].color.set('grey' );
-		}         
+		}
 		// set position for block
 		lampMesh.position.x += (blockX+0.5-nBlockX/2)*blockSizeX;
 		lampMesh.position.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
 		// merge it with cityGeometry - very important for performance
 		lampMesh.updateMatrix();
 		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix );
-		    
-		// set base position
+
+		// set pole position
 		lampMesh.position.copy(position);
 		lampMesh.position.y += sidewalkH;
-		// add poll offset        
-		lampMesh.scale.set(0.12,0.4,0.12);
+		// add pole offset
+		lampMesh.scale.set(0.1,lampH,0.1);
 		// colorify
 		for(var i = 0; i < lampMesh.geometry.faces.length; i++ ) {
-			lampMesh.geometry.faces[i].color.set('maroon' );
-		}         
+			lampMesh.geometry.faces[i].color.set('grey' );
+		}
 		// set position for block
 		lampMesh.position.x += (blockX+0.5-nBlockX/2)*blockSizeX;
 		lampMesh.position.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
 		// merge it with cityGeometry - very important for performance
 		lampMesh.updateMatrix();
-		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix );         
+		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix );
+
+		// set base position
+		lampMesh.position.copy(position);
+		lampMesh.position.y += sidewalkH;
+		// add poll offset
+		lampMesh.scale.set(0.12,0.4,0.12);
+		// colorify
+		for(var i = 0; i < lampMesh.geometry.faces.length; i++ ) {
+			lampMesh.geometry.faces[i].color.set('maroon' );
+		}
+		// set position for block
+		lampMesh.position.x += (blockX+0.5-nBlockX/2)*blockSizeX;
+		lampMesh.position.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
+		// merge it with cityGeometry - very important for performance
+		lampMesh.updateMatrix();
+		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix );
     }
 
     var object3d = new THREE.Object3D();
-    
+
     var lampGeometry= new THREE.CubeGeometry(1,1,1);
     lampGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
     var lampMesh = new THREE.Mesh(lampGeometry);
@@ -269,9 +284,9 @@ function buildSquareLamps(){
     var lightsGeometry  = new THREE.Geometry();
     var lampsGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
-    	for( var blockX = 0; blockX < nBlockX; blockX++){           
+    	for( var blockX = 0; blockX < nBlockX; blockX++){
 	        var position = new THREE.Vector3();
-	        // south   
+	        // south
 	        for(var i = 0; i < lampDensityW+1; i++){
 				position.x = (i/lampDensityW-0.5)*(blockSizeX-roadW-sidewalkW);
 				position.z = -0.5*(blockSizeZ-roadD-sidewalkD);
@@ -297,18 +312,18 @@ function buildSquareLamps(){
 			}
     	}
     }
-    
+
     // build the lamps Mesh
     var material  = new THREE.MeshLambertMaterial({
     	vertexColors : THREE.VertexColors
     });
     var lampsMesh = new THREE.Mesh(lampsGeometry, material );
     object3d.add(lampsMesh);
-  
+
     var texture = new THREE.TextureLoader().load( "./images/lensflare2_alpha.png" );
     var material = new THREE.PointsMaterial({
 		map : texture,
-		size : 8, 
+		size : 8,
 		transparent : true
     });
     var lightParticles = new THREE.Points( lightsGeometry, material );
@@ -337,9 +352,9 @@ function buildSquareCarLights(){
 		positionR.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
 		geometry.vertices.push( positionR );
 		geometry.colors.push( colorFront );
-		
+
 		position.x = -position.x;
-          
+
 		var positionL = position.clone();
 		positionL.x += -carW/2;
 		// set position for block
@@ -364,12 +379,12 @@ function buildSquareCarLights(){
     var geometry = new THREE.Geometry();
     var position = new THREE.Vector3();
     position.y = carH/2;
-    
+
     var colorFront = new THREE.Color('white');
     var colorBack = new THREE.Color('red');
 
     for( var blockX = 0; blockX < nBlockX; blockX++){
-    	for( var blockZ = 0; blockZ < nBlockZ; blockZ++){ 
+    	for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
     		// east
     		for(var i = 0; i < carLightsDensityD+1; i++){
 				position.x  = +0.5*blockSizeX-roadW/4
@@ -380,17 +395,17 @@ function buildSquareCarLights(){
     }
 
     var object3d  = new THREE.Object3D();
-    
+
     var texture = new THREE.TextureLoader().load( "../images/lensflare2_alpha.png" );
     var material  = new THREE.PointsMaterial({
 		map : texture,
-		size : 6, 
+		size : 6,
 		transparent : true,
 		vertexColors : THREE.VertexColors
     });
     var particles = new THREE.Points( geometry, material );
     particles.sortParticles = true;
     object3d.add(particles);
-    
+
     return object3d;
 }
