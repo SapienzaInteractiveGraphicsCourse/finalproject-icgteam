@@ -27,6 +27,33 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+	// CANNON JS initialization
+var world = new CANNON.World();
+world.quatNormalizeSkip = 0;
+world.quatNormalizeFast = false;
+world.defaultContactMaterial.contactEquationStiffness = 1e9;
+world.defaultContactMaterial.contactEquationRelaxation = 4;
+world.gravity.set(0, -1, 0);
+world.broadphase = new CANNON.NaiveBroadphase();
+
+var solver = new CANNON.GSSolver();
+solver.iterations = 7;
+solver.tolerance = 0.1;
+
+world.solver = new CANNON.SplitSolver(solver);
+
+physicsMaterial = new CANNON.Material("slipperyMaterial");
+var physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,
+                                                        physicsMaterial,
+                                                        0.0, // friction
+                                                        0.3  // restitution
+                                                        );
+world.addContactMaterial(physicsContactMaterial);
+	
+var bodies = new Array();
+var meshes = new Array();
+
+
 	// Scene 
 var scene = new THREE.Scene();
 
@@ -90,20 +117,27 @@ loader.load("models/pony_cartoon/scene.gltf",
 );
 
 	// Ground
+var groundShape = new CANNON.Plane();
+var groundMaterial = new CANNON.Material();
+var groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+groundBody.quaternion.setFromAxisAngle( new CANNON.Vec3(1,0,0), -Math.PI/2);
+groundBody.addShape(groundShape);
+world.add(groundBody);
+
 var ground = buildGround();
 scene.add(ground);
 
 	// Palaces
-var palaces = buildPalaces();
-scene.add(palaces);
+//var palaces = buildPalaces();
+//scene.add(palaces);
 
 	// Sidewalks
-var sidewalk = buildSidewalk();
-scene.add(sidewalk);
+//var sidewalk = buildSidewalk();
+//scene.add(sidewalk);
 
 	// lamps (not font of light)
-var lamps = buildSquareLamps();
-scene.add(lamps);
+//var lamps = buildSquareLamps();
+//scene.add(lamps);
 
 	// Generate NiceDude
 var NNiceDudes = nBlockX * nBlockZ;
@@ -155,10 +189,18 @@ scene.add(light);
 animate();
 
 	// Rendering function
+var delta = 1/60;
 function animate() {
-
   	requestAnimationFrame(animate);
 
+  	world.step(delta);
+
+  	// update cannon world
+  	for (var i = 0; i < bodies.length; i++){
+  		meshes[i].position.copy(bodies[i].position);
+        meshes[i].quaternion.copy(bodies[i].quaternion);
+  	}
+  
 	// Check for user input to make move the vehicle
 	checkUserInput();
 
@@ -170,7 +212,32 @@ function animate() {
 
     // Render(scene, camera)
   	renderer.render(scene, camera);
-  	
-
-
 }
+
+	// Little pause to enstablish the CAnnnon world
+function pausecomp(millis)
+{
+    var date = new Date();
+    var curDate = null;
+    do { curDate = new Date(); }
+    while(curDate-date < millis);
+}
+
+pausecomp(2000);
+
+	// Box
+var boxMaterial = new CANNON.Material();
+var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
+var boxBody = new CANNON.Body( {mass: 10, material: boxMaterial} );
+boxBody.addShape(boxShape);
+boxBody.angularVelocity.set(0, 2, 0);
+boxBody.position.set(0, 2, 5);
+world.add(boxBody);
+bodies.push(boxBody);
+
+var boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+var boxMaterial = new THREE.MeshLambertMaterial( {color: 0xffff00} );
+var boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+boxMesh.position.set(0, 2, 5);
+scene.add(boxMesh);
+meshes.push(boxMesh);
