@@ -27,6 +27,9 @@ function checkUserInput(){
 
 		// Translate vehicle
 	vehicle.position.x += speed * Math.sin(vehicle.rotation.y);
+	vehicle.position.y = 0;
 	vehicle.position.z += speed * Math.cos(vehicle.rotation.y);
+
+	return [vehicle.position, vehicle.rotation];
 
 }

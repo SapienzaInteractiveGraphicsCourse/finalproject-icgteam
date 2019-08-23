@@ -93,11 +93,13 @@ function buildGround(){
 	// Ground
 	var geometry = new THREE.PlaneGeometry( (nBlockX)*blockSizeX, (nBlockZ)*blockSizeZ);
 	//var texture = new THREE.TextureLoader().load('images/road_road.jpg');
-	var material = new THREE.MeshLambertMaterial({
-		color : 0x222222
-		//map : texture
-	})
-	var ground  = new THREE.Mesh(geometry, material);
+	var material = new THREE.MeshPhongMaterial({ 
+		color: 0x222222, 
+		shininess: 0,
+		//map: texture
+		dithering: true 
+	});
+	var ground = new THREE.Mesh(geometry, material);
 	ground.lookAt(new THREE.Vector3(0,1,0));
 	return ground;
 }

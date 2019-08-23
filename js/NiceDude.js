@@ -46,6 +46,8 @@ function NiceDude(x, y, z, theta){
 	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
 
+		// Light shadows
+	this.group.castShadow = true;
 }
 
 function Head(){
@@ -63,6 +65,7 @@ function Head(){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xffc1ae} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+	this.mesh.castShadow = true;
 }
 
 function Neck(){
