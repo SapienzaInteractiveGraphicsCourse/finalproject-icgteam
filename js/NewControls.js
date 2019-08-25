@@ -1,48 +1,46 @@
-var codes = {'W' : 87,
-			 'A' : 65,
-			 'S' : 83,
-			 'D' : 68
-			};
+var maxSteerVal = 0.5;
+var maxForce = 100;
+var brakeForce = 10000;
+function handler(event){
+    var up = (event.type == 'keyup');
 
-var velocityFactor = 0.2;
-var rotationFactor = 0.2;
+    if(!up && event.type !== 'keydown'){
+        return;
+    }
 
-var inputVelocity = new THREE.Vector3();
-var inputRotation = new THREE.Vector3();
+    vehicle.setBrake(0, 0);
+    vehicle.setBrake(0, 1);
+    vehicle.setBrake(0, 2);
+    vehicle.setBrake(0, 3);
 
-var euler = new THREE.Euler();
+    switch(event.keyCode){
 
-var quaternion = new THREE.Quaternion();
+    case 32: // space
+        vehicle.setBrake(brakeForce, 0);
+        vehicle.setBrake(brakeForce, 1);
+        vehicle.setBrake(brakeForce, 2);
+        vehicle.setBrake(brakeForce, 3);
+        break;
 
-// Function to check the control given in input from the user
-function checkUserInput(){
+    case 87: // forward
+        vehicle.applyEngineForce(up ? 0 : -maxForce, 2);
+        vehicle.applyEngineForce(up ? 0 : -maxForce, 3);
+        break;
 
-	inputVelocity.set(0, 0, 0);
+    case 83: // backward
+        vehicle.applyEngineForce(up ? 0 : maxForce, 2);
+        vehicle.applyEngineForce(up ? 0 : maxForce, 3);
+        break;
 
-	if (keyDown[codes['W']]){		// Increase speed
-		vehicleBody.applyEngineForce(3);
-		//inputVelocity.z += velocityFactor;
-	}		
-	if (keyDown[codes['S']]){	// Decrease speed
-		inputVelocity.z -= velocityFactor;
-	}
+    case 68: // right
+        vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 0);
+        vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 1);
+        break;
 
-	if (true){//Math.abs(speed) > 0.02){	// Rotate vehicle
-		if (keyDown[codes['A']])
-			inputRotation.y += rotationFactor;
-		if (keyDown[codes['D']])
-			inputRotation.y -= rotationFactor;
-	}
+    case 65: // left
+        vehicle.setSteeringValue(up ? 0 : maxSteerVal, 0);
+        vehicle.setSteeringValue(up ? 0 : maxSteerVal, 1);
+        break;
 
-	euler.y = inputRotation.y;
-	euler.order = "XYZ";
-	quaternion.setFromEuler(euler);
-	inputVelocity.applyQuaternion(quaternion);
-
-	vehicleBody.velocity.x += inputVelocity.x;
-	vehicleBody.velocity.z += inputVelocity.z;
-
-	vehicle.position.copy(vehicleBody.position);
-
+    }
 }
-
