@@ -47,7 +47,7 @@ world.gravity.set(0, -9.81, 0);			// -9.81 m/s^2
 var groundMaterial = new CANNON.Material("groundMaterial");
 var wheelMaterial = new CANNON.Material("wheelMaterial");
 var wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
-    friction: 0.3,
+    friction: 0.6,
     restitution: 0,
     contactEquationStiffness: 1000
 });
@@ -104,21 +104,21 @@ loader.load("models/pony_cartoon/scene.gltf",
 		}
 );
 	// Ground
-var ground = buildGround();
-scene.add(ground);
+var groundMesh = buildGround();
+scene.add(groundMesh);
 
 	// Palaces
-//var palaces = buildPalaces();
-//scene.add(palaces);
+var palacesMesh = buildPalaces();
+scene.add(palacesMesh);
 
 	// Sidewalks
 var sidewalk = buildSidewalk();
 scene.add(sidewalk);
 
 	// lamps (not font of light)
-//var lamps = buildSquareLamps();
-//scene.add(lamps);
-/*
+var lamps = buildSquareLamps();
+scene.add(lamps);
+
 	// Generate NiceDude
 var NNiceDudes = nBlockX * nBlockZ;
 var niceDudes = new Array(NNiceDudes);
@@ -159,7 +159,6 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 		i += 1;
 	}
 }
-*/
 
 	// Demo ambient light
 var ambient = new THREE.AmbientLight( 0xffffff, 0.3 );
@@ -181,7 +180,7 @@ function animate() {
 
   	world.step(fixedTimeStep);
 
-  	cannonDebugRender.update();
+  	//cannonDebugRender.update();
   	/*
   	// update cannon world
   	for (var i = 0; i < bodies.length; i++){
@@ -194,11 +193,11 @@ function animate() {
 	if (enableVehicleMesh && enableVehicleBody) {
 		vehicleMesh.position.copy(chassisBody.position);
 		vehicleMesh.quaternion.copy(chassisBody.quaternion);
-		vehicleMesh.position.y -= 0.8;
+		vehicleMesh.position.y -= 0.7;		
+		vehicleMesh.position.z += 0.05;
 		vehicleMesh.rotateZ(Math.PI/2);
 		vehicleMesh.rotateX(Math.PI/2);
 	}
-
 	
 	// Update target to follow for OrbitController
 	controls.target.copy(vehicleMesh.position);
@@ -230,14 +229,24 @@ scene.add(boxMesh);
 */
 
 /*		Raycast vehicle  	*/
-var mass = 150;
 var chassisShape;
-chassisShape = new CANNON.Box(new CANNON.Vec3(2, 1,0.5));
-var chassisBody = new CANNON.Body({ mass: mass });
+chassisShape = new CANNON.Box(new CANNON.Vec3(1.6, 0.8, 0.3));
+var chassisBody = new CANNON.Body({ mass: 150 });
 chassisBody.addShape(chassisShape);
 chassisBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), -Math.PI/2);
 chassisBody.position.set(0, 5, 0);
 chassisBody.angularVelocity.set(-2, 0, 0);
+
+var topChassisBody;
+topChassisShape = new CANNON.Sphere(0.8);
+var topChassisBody = new CANNON.Body({ mass: 50 });
+topChassisBody.addShape(topChassisShape);
+topChassisBody.position.set(0, 5.5, 0.5);
+world.addBody(topChassisBody);
+
+var topChassisConstraint = new CANNON.LockConstraint(chassisBody, topChassisBody);
+topChassisConstraint.collideConnected = false;
+world.addConstraint(topChassisConstraint);
 
 var options = {
     radius: 0.5,
@@ -261,16 +270,16 @@ vehicle = new CANNON.RaycastVehicle({
     chassisBody: chassisBody,
 });
 
-options.chassisConnectionPointLocal.set(1, 1, 0);
+options.chassisConnectionPointLocal.set(1, 0.8, 0);
 vehicle.addWheel(options);
 
-options.chassisConnectionPointLocal.set(1, -1, 0);
+options.chassisConnectionPointLocal.set(1, -0.8, 0);
 vehicle.addWheel(options);
 
-options.chassisConnectionPointLocal.set(-1, 1, 0);
+options.chassisConnectionPointLocal.set(-1, 0.8, 0);
 vehicle.addWheel(options);
 
-options.chassisConnectionPointLocal.set(-1, -1, 0);
+options.chassisConnectionPointLocal.set(-1, -0.8, 0);
 vehicle.addWheel(options);
 
 vehicle.addToWorld(world);

@@ -106,30 +106,6 @@ function buildGround(){
 
 // Return the mesh containing all palaces meshes
 function buildPalaces(){
-
-	// base colors for vertexColors. light is for vertices at the top, shaddow is for the ones at the bottom
-	function colorifyBuilding(buildingMesh){
-		var light = new THREE.Color( 0xffffff );
-		var shadow  = new THREE.Color( 0x303050 );
-			// establish the base color for the buildingMesh
-		var value = 1 - Math.random() * Math.random();
-		var baseColor = new THREE.Color().setRGB( value + Math.random() * 0.1, value, value + Math.random() * 0.1 );
-			// set topColor/bottom vertexColors as adjustement of baseColor
-		var topColor  = baseColor.clone().multiply( light );
-		var bottomColor = baseColor.clone().multiply( shadow );
-			// set .vertexColors for each face
-		var geometry  = buildingMesh.geometry;    
-		for ( var j = 0, jl = geometry.faces.length; j < jl; j ++ ) {
-			if ( j === 2 ) {
-				// set face.vertexColors on root face
-				geometry.faces[ j ].vertexColors = [ baseColor, baseColor, baseColor, baseColor ];
-			} else {
-				// set face.vertexColors on sides faces
-				geometry.faces[ j ].vertexColors = [ topColor, bottomColor, bottomColor, topColor ];
-			}
-		}   
-	}
-
 	var buildingMesh = createBaseBuilding();
 	var cityGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
@@ -148,7 +124,13 @@ function buildPalaces(){
 				buildingMesh.scale.y = (Math.random() * Math.random() * buildingMesh.scale.x) * 3 + 4;
 				buildingMesh.scale.z = Math.min(buildingMesh.scale.x, buildingMaxD)
 
-				//colorifyBuilding(buildingMesh);
+				    // Create sidewalkBody
+		        var buildingMaterial = new CANNON.Material();
+				var buildingShape = new CANNON.Box(new CANNON.Vec3(buildingMesh.scale.x/2, buildingMesh.scale.y, buildingMesh.scale.z/2));
+				var buildingBody = new CANNON.Body( {mass: 0, material: buildingMaterial} );
+				buildingBody.addShape(buildingShape);
+				buildingBody.position.set(buildingMesh.position.x, buildingMesh.position.y, buildingMesh.position.z);
+				world.add(buildingBody);
 
 				// merge it with cityGeometry - very important for performance
 				buildingMesh.updateMatrix();
@@ -183,6 +165,14 @@ function buildSidewalk(){
         buildingMesh.scale.x  = blockSizeX-roadW;
         buildingMesh.scale.y  = sidewalkH;
         buildingMesh.scale.z  = blockSizeZ-roadD;
+
+        	// Create sidewalkBody
+        var sidewalkMaterial = new CANNON.Material();
+		var sidewalkShape = new CANNON.Box(new CANNON.Vec3(buildingMesh.scale.x/2, buildingMesh.scale.y, buildingMesh.scale.z/2));
+		var sidewalkBody = new CANNON.Body( {mass: 0, material: sidewalkMaterial} );
+		sidewalkBody.addShape(sidewalkShape);
+		sidewalkBody.position.set(buildingMesh.position.x, buildingMesh.position.y, buildingMesh.position.z);
+		world.add(sidewalkBody);
 
         // merge it with cityGeometry - very important for performance
         buildingMesh.updateMatrix();
@@ -240,6 +230,14 @@ function buildSquareLamps(){
 		// merge it with cityGeometry - very important for performance
 		lampMesh.updateMatrix();
 		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix );
+
+			// Create lampBody
+        var lampMaterial = new CANNON.Material();
+		var lampShape = new CANNON.Box(new CANNON.Vec3(0.05, lampH, 0.05));
+		var lampBody = new CANNON.Body( {mass: 0, material: lampMaterial} );
+		lampBody.addShape(lampShape);
+		lampBody.position.set(lampMesh.position.x, lampMesh.position.y, lampMesh.position.z);
+		world.add(lampBody);
 		    
 		// set base position
 		lampMesh.position.copy(position);
@@ -253,6 +251,7 @@ function buildSquareLamps(){
 		// set position for block
 		lampMesh.position.x += (blockX+0.5-nBlockX/2)*blockSizeX;
 		lampMesh.position.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
+
 		// merge it with cityGeometry - very important for performance
 		lampMesh.updateMatrix();
 		lampsGeometry.merge( lampMesh.geometry, lampMesh.matrix );         
@@ -314,82 +313,5 @@ function buildSquareLamps(){
     lightParticles.sortParticles = true;
     object3d.add( lightParticles );
 
-    return object3d;
-}
-
-function buildSquareCarLights(){
-
-	// Useful functino to add a single CarLight
-	function addCarLights(position){
-		var positionL = position.clone();
-		positionL.x += -carW/2;
-		// set position for block
-		positionL.x += (blockX+0.5-nBlockX/2)*blockSizeX;
-		positionL.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-		geometry.vertices.push( positionL );
-		geometry.colors.push( colorFront );
-
-		var positionR = position.clone();
-		positionR.x += carW/2;
-		// set position for block
-		positionR.x += (blockX+0.5-nBlockX/2)*blockSizeX;
-		positionR.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-		geometry.vertices.push( positionR );
-		geometry.colors.push( colorFront );
-		
-		position.x = -position.x;
-          
-		var positionL = position.clone();
-		positionL.x += -carW/2;
-		// set position for block
-		positionL.x += (blockX+0.5-nBlockX/2)*blockSizeX;
-		positionL.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ;
-		geometry.vertices.push( positionL );
-		geometry.colors.push( colorBack );
-
-		var positionR = position.clone();
-		positionR.x += carW/2;
-		// set position for block
-		positionR.x += (blockX+0.5-nBlockX/2)*blockSizeX
-		positionR.z += (blockZ+0.5-nBlockZ/2)*blockSizeZ
-		geometry.vertices.push( positionR );
-		geometry.colors.push( colorBack );
-    }
-
-	var carLightsDensityD = 4;
-    var carW = 1;
-    var carH = 2;
-
-    var geometry = new THREE.Geometry();
-    var position = new THREE.Vector3();
-    position.y = carH/2;
-    
-    var colorFront = new THREE.Color('white');
-    var colorBack = new THREE.Color('red');
-
-    for( var blockX = 0; blockX < nBlockX; blockX++){
-    	for( var blockZ = 0; blockZ < nBlockZ; blockZ++){ 
-    		// east
-    		for(var i = 0; i < carLightsDensityD+1; i++){
-				position.x  = +0.5*blockSizeX-roadW/4
-				position.z  = (i/carLightsDensityD-0.5)*(blockSizeZ-roadD)
-				addCarLights(position)
-        	}
-      	}
-    }
-
-    var object3d  = new THREE.Object3D();
-    
-    var texture = new THREE.TextureLoader().load( "../images/lensflare2_alpha.png" );
-    var material  = new THREE.PointsMaterial({
-		map : texture,
-		size : 6, 
-		transparent : true,
-		vertexColors : THREE.VertexColors
-    });
-    var particles = new THREE.Points( geometry, material );
-    particles.sortParticles = true;
-    object3d.add(particles);
-    
     return object3d;
 }

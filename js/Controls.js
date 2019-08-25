@@ -1,35 +1,51 @@
-// Function to check the control given in input from the user
-function checkUserInput(){
-	var codes = {'W' : 87,
-				 'A' : 65,
-				 'S' : 83,
-				 'D' : 68
-				};
+var maxSteerVal = 0.5;
+var maxForce = 200;
+var brakeForce = 100;
+function handler(event){
+    var up = (event.type == 'keyup');
 
-	if (keyDown[codes['W']]){		// Increase speed
-		if (speed < maxSpeed)			
-			speed += 0.01;
-	}		
-	else if (keyDown[codes['S']]){	// Decrease speed
-		if (speed > minSpeed)
-			speed -= 0.01;
-	}
-	else {							// Friction force
-		speed -= speed * 0.03;
-	}
-		
-	if (Math.abs(speed) > 0.02){	// Rotate vehicle
-		if (keyDown[codes['A']])
-			vehicle.rotation.y += Math.sign(speed) * 0.02;
-		if (keyDown[codes['D']])
-			vehicle.rotation.y -= Math.sign(speed) * 0.02;
-	}
+    if(!up && event.type !== 'keydown'){
+        return;
+    }
 
-		// Translate vehicle
-	vehicle.position.x += speed * Math.sin(vehicle.rotation.y);
-	vehicle.position.y = 0;
-	vehicle.position.z += speed * Math.cos(vehicle.rotation.y);
+    vehicle.setBrake(0, 0);
+    vehicle.setBrake(0, 1);
+    vehicle.setBrake(0, 2);
+    vehicle.setBrake(0, 3);
 
-	return [vehicle.position, vehicle.rotation];
+    switch(event.keyCode){
 
+    case 82: // r
+        var impulse = new CANNON.Vec3(0, 0, -500); 
+        var leftSide = new CANNON.Vec3(1, 0, 0);
+        chassisBody.applyLocalImpulse(impulse, leftSide);
+        break;
+    case 32: // space
+        vehicle.setBrake(brakeForce, 0);
+        vehicle.setBrake(brakeForce, 1);
+        vehicle.setBrake(brakeForce, 2);
+        vehicle.setBrake(brakeForce, 3);
+        break;
+
+    case 87: // forward
+        vehicle.applyEngineForce(up ? 0 : -maxForce, 2);
+        vehicle.applyEngineForce(up ? 0 : -maxForce, 3);
+        break;
+
+    case 83: // backward
+        vehicle.applyEngineForce(up ? 0 : maxForce, 2);
+        vehicle.applyEngineForce(up ? 0 : maxForce, 3);
+        break;
+
+    case 68: // right
+        vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 0);
+        vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 1);
+        break;
+
+    case 65: // left
+        vehicle.setSteeringValue(up ? 0 : maxSteerVal, 0);
+        vehicle.setSteeringValue(up ? 0 : maxSteerVal, 1);
+        break;
+
+    }
 }
