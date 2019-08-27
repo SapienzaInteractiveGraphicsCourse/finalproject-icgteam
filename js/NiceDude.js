@@ -46,6 +46,16 @@ function NiceDude(x, y, z, theta){
 	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
 
+		// Create niceDude CANNON Body
+	var material = new CANNON.Material();
+	var shape = new CANNON.Box(new CANNON.Vec3(0.2, 1, 0.2));
+	this.body = new CANNON.Body( {mass: 10, material: material} );
+	this.body.addShape(shape);
+	this.body.position.set(x, y+2, z);
+	world.addBody(this.body);
+
+		// Light shadows
+	this.group.castShadow = true;
 }
 
 function Head(){
@@ -63,6 +73,7 @@ function Head(){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xffc1ae} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+	this.mesh.castShadow = true;
 }
 
 function Neck(){

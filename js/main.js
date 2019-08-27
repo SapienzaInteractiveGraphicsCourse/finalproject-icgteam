@@ -1,7 +1,7 @@
 /*
 			Z coord
 			^
-			| 
+			|
 			|
 			|
 	--------+-------> X coord
@@ -12,12 +12,9 @@
 */
 
     // HTML Listeners
-document.onkeydown = function(event) {
-	keyDown[event.keyCode] = true;
-};
-document.onkeyup = function(event) {
-    keyDown[event.keyCode] = false;	
-};
+document.onkeydown = handler;
+document.onkeyup = handler;
+
 document.getElementById("backgroundSelect").addEventListener("change", function(){
 	setBackground(document.getElementById("backgroundSelect").value);
 });
@@ -27,7 +24,7 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-	// Scene 
+	// Scene
 var scene = new THREE.Scene();
 
 	// Camera
@@ -41,7 +38,30 @@ camera.position.y = 4;
 camera.position.z = -7;
 scene.add(camera);
 
-	// WindowResize lib to handle window resize
+	// Initialize CANNON WORLD
+var world = new CANNON.World();
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.gravity.set(0, -9.81, 0);			// -9.81 m/s^2
+
+var groundMaterial = new CANNON.Material("groundMaterial");
+var wheelMaterial = new CANNON.Material("wheelMaterial");
+var wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
+    friction: 0.3,
+    restitution: 0,
+    contactEquationStiffness: 1000
+});
+world.addContactMaterial(wheelGroundContactMaterial);
+
+var groundShape = new CANNON.Plane();
+var groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/2);
+groundBody.addShape(groundShape);
+world.addBody(groundBody);
+
+	// Cannon Debugger
+var cannonDebugRender = new THREE.CannonDebugRenderer(scene, world);
+
+	// WindowResize lib to handle window resizes
 var windowResize = new THREEx.WindowResize(renderer, camera);
 
 	// BackgroundSelector
@@ -60,42 +80,35 @@ function setBackground(background){
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.maxDistance = 9;
 
-	// Vehicle Controls
-var vehicle = new THREE.Object3D();;
-var speed = 0;
-var minSpeed = -0.1;
-var maxSpeed = 0.1;
-
-var keyDown = new Array();
-for (var i = 0; i < 300; i++) {
-    keyDown[i] = false;
-}
-	
-	// Setup model loader and load car model
+	// Load Texture Vehicle
+var enableVehicleMesh = false;
+var enableVehicleBody = false;
+var vehicleMesh = new THREE.Object3D();
 var loader = new THREE.GLTFLoader();
 loader.load("models/pony_cartoon/scene.gltf",
-			function(gltf){		// OnLoad
-				vehicle = gltf.scene;
-				vehicle.scale.set(0.005,0.005,0.005);
-				vehicle.updateMatrix();
-				scene.add(vehicle);
-			},
-			function(xhr){		// OnProgress
-				var perc = xhr.loaded / xhr.total * 100;
-				console.log('pony_cartoon ' + perc + '% loaded');
-			},
-			function(error){	// OnError
-				console.log("Cannot load the model");
-			}
+		function(gltf){		// OnLoad
+			vehicleMesh = gltf.scene;
+			vehicleMesh.rotateZ(Math.PI/2);
+			vehicleMesh.scale.set(0.005, 0.005, 0.005);
+			vehicleMesh.updateMatrix();
+			scene.add(vehicleMesh);
+			enableVehicleMesh = true;
+		},
+		function(xhr){		// OnProgress
+			var perc = xhr.loaded / xhr.total * 100;
+			console.log('pony_cartoon ' + perc + '% loaded.');
+		},
+		function(error){	// OnError
+			console.log("Cannot load the model.");
+		}
 );
-
 	// Ground
-var ground = buildGround();
-scene.add(ground);
+var groundMesh = buildGround();
+scene.add(groundMesh);
 
 	// Palaces
-var palaces = buildPalaces();
-scene.add(palaces);
+var palacesMesh = buildPalaces();
+scene.add(palacesMesh);
 
 	// Sidewalks
 var sidewalk = buildSidewalk();
@@ -105,9 +118,110 @@ scene.add(sidewalk);
 var lamps = buildSquareLamps();
 scene.add(lamps);
 
-	// Generate NiceDude
+	// Demo ambient light
+var ambient = new THREE.AmbientLight( 0xffffff, 0.3 );
+scene.add( ambient );
+
+	// Demo spotlight
+var spotlight = new THREE.SpotLight(0xffffff, 1);
+spotlight.position.set( 0, 100, 0 );
+spotlight.castShadow = true;
+scene.add(spotlight);
+
+	// NiceDudes variables
+var enableNiceDudeBody = false;
 var NNiceDudes = nBlockX * nBlockZ;
 var niceDudes = new Array(NNiceDudes);
+
+	// First call render
+animate();
+
+
+	/*		Raycast vehicle  	*/
+var chassisShape;
+chassisShape = new CANNON.Box(new CANNON.Vec3(1.6, 0.8, 0.3));
+var chassisBody = new CANNON.Body({ mass: 150 });
+chassisBody.addShape(chassisShape);
+chassisBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), -Math.PI/2);
+chassisBody.position.set(0, 5, 0);
+chassisBody.angularVelocity.set(-2, 0, 0);
+
+var topChassisBody;
+topChassisShape = new CANNON.Sphere(0.8);
+var topChassisBody = new CANNON.Body({ mass: 50 });
+topChassisBody.addShape(topChassisShape);
+topChassisBody.position.set(0, 5.5, 0.5);
+world.addBody(topChassisBody);
+
+var topChassisConstraint = new CANNON.LockConstraint(chassisBody, topChassisBody);
+topChassisConstraint.collideConnected = false;
+world.addConstraint(topChassisConstraint);
+
+var options = {
+    radius: 0.5,
+    directionLocal: new CANNON.Vec3(0, 0, -1),
+    suspensionStiffness: 30,
+    suspensionRestLength: 0.3,
+    frictionSlip: 5,
+    dampingRelaxation: 2.3,
+    dampingCompression: 4.4,
+    maxSuspensionForce: 100000,
+    rollInfluence:  0.01,
+    axleLocal: new CANNON.Vec3(0, 1, 0),
+    chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0),
+    maxSuspensionTravel: 0.3,
+    customSlidingRotationalSpeed: -30,
+    useCustomSlidingRotationalSpeed: true
+};
+
+vehicle = new CANNON.RaycastVehicle({
+    chassisBody: chassisBody,
+});
+
+options.chassisConnectionPointLocal.set(1, 0.8, 0);
+vehicle.addWheel(options);
+
+options.chassisConnectionPointLocal.set(1, -0.8, 0);
+vehicle.addWheel(options);
+
+options.chassisConnectionPointLocal.set(-1, 0.8, 0);
+vehicle.addWheel(options);
+
+options.chassisConnectionPointLocal.set(-1, -0.8, 0);
+vehicle.addWheel(options);
+
+vehicle.addToWorld(world);
+
+var wheelBodies = [];
+for(var i=0; i<vehicle.wheelInfos.length; i++){
+    var wheel = vehicle.wheelInfos[i];
+    var cylinderShape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 20);
+    var wheelBody = new CANNON.Body({
+        mass: 10
+    });
+    wheelBody.type = CANNON.Body.KINEMATIC;
+    wheelBody.collisionFilterGroup = 0; // turn off collisions
+    var q = new CANNON.Quaternion();
+    q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
+    wheelBody.addShape(cylinderShape, new CANNON.Vec3(), q);
+    wheelBodies.push(wheelBody);
+    world.addBody(wheelBody);
+}
+
+// Update wheels
+world.addEventListener('postStep', function(){
+    for (var i = 0; i < vehicle.wheelInfos.length; i++) {
+        vehicle.updateWheelTransform(i);
+        var t = vehicle.wheelInfos[i].worldTransform;
+        var wheelBody = wheelBodies[i];
+        wheelBody.position.copy(t.position);
+        wheelBody.quaternion.copy(t.quaternion);
+    }
+});
+vehicle.addToWorld(world);
+enableVehicleBody = true;
+
+	// Generate NiceDude
 var i = 0;
 for (var r = -nBlockX/2; r < nBlockX/2; r++){
 	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
@@ -116,7 +230,6 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 		var y = 0.01;
 		var z = c * blockSizeZ + blockSizeZ/2;
 		var theta;
-		var velocity;	// !!! TODO: Randomize velocity for animatyion  !!!
 			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
 			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
 		var side = Math.floor(Math.random() * 4);
@@ -141,36 +254,52 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 		}
 		niceDudes[i] = new NiceDude(x, y, z, theta);
 		scene.add(niceDudes[i].group);
-
 		i += 1;
 	}
 }
-
-	// Demo light
-var light = new THREE.HemisphereLight(0xfffff0, 0x101020, 1.25);
-light.position.set(50, 50, 50);
-scene.add(light);
-
-	// First call render
-animate();
+enableNiceDudeBody = true;
 
 	// Rendering function
+var fixedTimeStep = 1.0/60.0;
 function animate() {
-
   	requestAnimationFrame(animate);
 
+  	world.step(fixedTimeStep);
+
+  	//cannonDebugRender.update();
+  	/*
+  	// update cannon world
+  	for (var i = 0; i < bodies.length; i++){
+  		meshes[i].position.copy(bodies[i].position);
+        meshes[i].quaternion.copy(bodies[i].quaternion);
+  	}
+  	*/
+
 	// Check for user input to make move the vehicle
-	checkUserInput();
+	if (enableVehicleMesh && enableVehicleBody){
+		vehicleMesh.position.copy(chassisBody.position);
+		vehicleMesh.quaternion.copy(chassisBody.quaternion);
+		vehicleMesh.position.y -= 0.7;		
+		vehicleMesh.position.z += 0.05;
+		vehicleMesh.rotateZ(Math.PI/2);
+		vehicleMesh.rotateX(Math.PI/2);
+
+		CarController();
+	}
+	
+	if (enableNiceDudeBody){
+		for (var i = 0; i < niceDudes.length; i++){
+			niceDudes[i].group.position.copy(niceDudes[i].body.position);
+			niceDudes[i].group.position.y -= 1;
+			//niceDudes[i].group.quaternion.copy(niceDudes[i].body.quaternion);
+		}
+	}
 
 	// Update target to follow for OrbitController
-	controls.target.x = vehicle.position.x;
-	controls.target.y = vehicle.position.y + 2.8;
-	controls.target.z = vehicle.position.z;
+	controls.target.copy(vehicleMesh.position);
+	controls.target.y += 2.8;
 	controls.update();
-
+	
     // Render(scene, camera)
   	renderer.render(scene, camera);
-  	
-
-
 }

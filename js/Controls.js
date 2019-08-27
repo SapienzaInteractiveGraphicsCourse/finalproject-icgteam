@@ -1,32 +1,110 @@
-// Function to check the control given in input from the user
-function checkUserInput(){
-	var codes = {'W' : 87,
-				 'A' : 65,
-				 'S' : 83,
-				 'D' : 68
-				};
+var maxSteerVal = 0.5;
+var maxForce = 200;
+var brakeForce = 10;
 
-	if (keyDown[codes['W']]){		// Increase speed
-		if (speed < maxSpeed)			
-			speed += 0.01;
-	}		
-	else if (keyDown[codes['S']]){	// Decrease speed
-		if (speed > minSpeed)
-			speed -= 0.01;
-	}
-	else {							// Friction force
-		speed -= speed * 0.03;
-	}
-		
-	if (Math.abs(speed) > 0.02){	// Rotate vehicle
-		if (keyDown[codes['A']])
-			vehicle.rotation.y += Math.sign(speed) * 0.02;
-		if (keyDown[codes['D']])
-			vehicle.rotation.y -= Math.sign(speed) * 0.02;
-	}
+var keyDown = new Array(320);
+for (var i = 0; i < keyDown.length; i++)
+    keyDown[i] = false;
 
-		// Translate vehicle
-	vehicle.position.x += speed * Math.sin(vehicle.rotation.y);
-	vehicle.position.z += speed * Math.cos(vehicle.rotation.y);
+function CarController(){
+    if (!keyDown[65] && !keyDown[68]){
+        vehicle.setSteeringValue(0, 0);
+        vehicle.setSteeringValue(0, 1);
+    }
+    if (!keyDown[87] && !keyDown[83]){
+        vehicle.applyEngineForce(0, 2);
+        vehicle.applyEngineForce(0, 3);
+    }
+    if (!keyDown[32]){
+        vehicle.setBrake(0, 0);
+        vehicle.setBrake(0, 1);
+    }
+
+    if (keyDown[81]){ // q
+        var impulse = new CANNON.Vec3(0, 0, 10); 
+        var leftSide = new CANNON.Vec3(0, -1, 0);
+        chassisBody.applyLocalImpulse(impulse, leftSide);
+    }    
+    if (keyDown[69]){ // e
+        var impulse = new CANNON.Vec3(0, 0, 10); 
+        var rightSide = new CANNON.Vec3(0, 1, 0);
+        chassisBody.applyLocalImpulse(impulse, rightSide);
+    }
+    if (keyDown[32]){ // space
+        vehicle.setBrake(brakeForce, 0);
+        vehicle.setBrake(brakeForce, 1);
+    }
+    if (keyDown[87]){ // forward
+        vehicle.applyEngineForce(-maxForce, 2);
+        vehicle.applyEngineForce(-maxForce, 3);
+    }
+    if (keyDown[83]){ // backward
+        vehicle.applyEngineForce(maxForce, 2);
+        vehicle.applyEngineForce(maxForce, 3);
+    }
+    if (keyDown[65]){  // left
+        vehicle.setSteeringValue(maxSteerVal, 0);
+        vehicle.setSteeringValue(maxSteerVal, 1);
+    }
+    if (keyDown[68]){  // right
+        vehicle.setSteeringValue(-maxSteerVal, 0);
+        vehicle.setSteeringValue(-maxSteerVal, 1);
+    }
+
+}
+
+function handler(event){
+    var up = (event.type == 'keyup');
+    var down = (event.type == 'keydown');
+    if (down){
+        switch(event.keyCode){
+            case 81:
+                keyDown[81] = true;
+                break;
+            case 69:
+                keyDown[69] = true;
+                break;
+            case 32:
+                keyDown[32] = true;
+                break;
+            case 87:
+                keyDown[87] = true;
+                break;
+            case 83:
+                keyDown[83] = true;
+                break;
+            case 68:
+                keyDown[68] = true;
+                break;
+            case 65:
+                keyDown[65] = true;
+                break;
+        }
+    }
+    else if (up) {
+        switch(event.keyCode){
+            case 81:
+                keyDown[81] = false;
+                break;
+            case 69:
+                keyDown[69] = false;
+                break;
+            case 32:
+                keyDown[32] = false;
+                break;
+            case 87:
+                keyDown[87] = false;
+                break;
+            case 83:
+                keyDown[83] = false;
+                break;
+            case 68:
+                keyDown[68] = false;
+                break;
+            case 65:
+                keyDown[65] = false;
+                break;
+        }
+    }
 
 }
