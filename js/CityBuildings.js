@@ -56,7 +56,7 @@ function createBaseBuilding(){
 
 // Return the ground mesh
 function buildGround(){
-	var groundTexture = new THREE.TextureLoader().load( "./images/road_road.jpg");
+	var groundTexture = new THREE.TextureLoader().load( "./images/textures/road_road.jpg");
 	groundTexture.wrapS = THREE.RepeatWrapping;
 	groundTexture.wrapT = THREE.RepeatWrapping;
 	groundTexture.repeat.set( 4, 4 );
@@ -100,7 +100,7 @@ function buildGround(){
 	var westLimitMesh = new THREE.Mesh(westLimitGeometry, groundMaterial);
 	limitsGeometry.merge(westLimitMesh.geometry, westLimitMesh.matrix);
 
-	var limitsTexture = new THREE.TextureLoader().load( "./images/wood_fence.jpg");
+	var limitsTexture = new THREE.TextureLoader().load( "./images/textures/wood_fence.jpg");
 	limitsTexture.wrapS = THREE.RepeatWrapping;
 	limitsTexture.wrapT = THREE.RepeatWrapping;
 
@@ -151,7 +151,7 @@ function buildPalaces(){
 		}
     }
 
-	var texture = new THREE.TextureLoader().load( "./images/windows.jpg" )
+	var texture = new THREE.TextureLoader().load( "./images/textures/windows.jpg" )
 
     // build the city Mesh
     var material  = new THREE.MeshLambertMaterial({
@@ -313,7 +313,7 @@ function buildSquareLamps(){
     var lampsMesh = new THREE.Mesh(lampsGeometry, material );
     object3d.add(lampsMesh);
 
-    var texture = new THREE.TextureLoader().load( "./images/lensflare2_alpha.png" );
+    var texture = new THREE.TextureLoader().load( "./images/lights/lensflare2_alpha.png" );
     var material = new THREE.PointsMaterial({
 		map : texture,
 		size : 8,

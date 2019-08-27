@@ -94,6 +94,14 @@ var cannonDebugRender = new THREE.CannonDebugRenderer(scene, world);
 	// WindowResize lib to handle window resizes
 var windowResize = new THREEx.WindowResize(renderer, camera);
 
+	// Stats
+var render_stats = new Stats();
+render_stats.domElement.style.position = 'absolute';
+render_stats.domElement.style.top = '40px';
+render_stats.domElement.style.left = '1px';
+render_stats.domElement.style.zIndex = 100;
+document.body.appendChild(render_stats.domElement);
+
 	// BackgroundSelector
 function setBackground(background){
 	if (background == 'null')
@@ -342,6 +350,8 @@ function animate() {
 	controls.target.y += 2.8;
 	controls.update();
 	
+	// Update statistics
+	render_stats.update();
 
     // Render(scene, camera)
   	renderer.render(scene, camera);
