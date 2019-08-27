@@ -47,7 +47,7 @@ world.gravity.set(0, -9.81, 0);			// -9.81 m/s^2
 var groundMaterial = new CANNON.Material("groundMaterial");
 var wheelMaterial = new CANNON.Material("wheelMaterial");
 var wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
-    friction: 0.6,
+    friction: 0.3,
     restitution: 0,
     contactEquationStiffness: 1000
 });
@@ -62,7 +62,7 @@ world.addBody(groundBody);
 	// Cannon Debugger
 var cannonDebugRender = new THREE.CannonDebugRenderer(scene, world);
 
-	// WindowResize lib to handle window resize
+	// WindowResize lib to handle window resizes
 var windowResize = new THREEx.WindowResize(renderer, camera);
 
 	// BackgroundSelector
@@ -119,47 +119,6 @@ scene.add(sidewalk);
 var lamps = buildSquareLamps();
 scene.add(lamps);
 
-	// Generate NiceDude
-var NNiceDudes = nBlockX * nBlockZ;
-var niceDudes = new Array(NNiceDudes);
-var i = 0;
-for (var r = -nBlockX/2; r < nBlockX/2; r++){
-	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
-			// Set the position at the center of the block
-		var x = r * blockSizeX + blockSizeX/2;
-		var y = 0.01;
-		var z = c * blockSizeZ + blockSizeZ/2;
-		var theta;
-		var velocity;	// !!! TODO: Randomize velocity for animatyion  !!!
-			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
-			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
-		var side = Math.floor(Math.random() * 4);
-		var direction = Math.floor(Math.random()*2);
-		switch (side){
-			case 0:
-				z = z + blockSizeZ/2 - roadD/2 - sidewalkD/2;
-				theta = (direction ? +Math.PI/2 : -Math.PI/2);
-				break;
-			case 1:
-				x = x + blockSizeX/2 - roadW/2 - sidewalkW/2;
-				theta = (direction ? +Math.PI : 0);
-				break;
-			case 2:
-				z = z - blockSizeZ/2 + roadD/2 + sidewalkD/2;
-				theta = (direction ? -Math.PI/2 : +Math.PI/2);
-				break;
-			case 3:
-				x = x - blockSizeX/2 + roadW/2 + sidewalkW/2;
-				theta = (direction ? 0 : -Math.PI);
-				break;
-		}
-		niceDudes[i] = new NiceDude(x, y, z, theta);
-		scene.add(niceDudes[i].group);
-
-		i += 1;
-	}
-}
-
 	// Demo ambient light
 var ambient = new THREE.AmbientLight( 0xffffff, 0.3 );
 scene.add( ambient );
@@ -170,45 +129,15 @@ spotlight.position.set( 0, 100, 0 );
 spotlight.castShadow = true;
 scene.add(spotlight);
 
+	// NiceDudes variables
+var enableNiceDudeBody = false;
+var NNiceDudes = nBlockX * nBlockZ;
+var niceDudes = new Array(NNiceDudes);
+
 	// First call render
 animate();
 
-	// Rendering function
-var fixedTimeStep = 1.0/60.0
-function animate() {
-  	requestAnimationFrame(animate);
-
-  	world.step(fixedTimeStep);
-
-  	//cannonDebugRender.update();
-  	/*
-  	// update cannon world
-  	for (var i = 0; i < bodies.length; i++){
-  		meshes[i].position.copy(bodies[i].position);
-        meshes[i].quaternion.copy(bodies[i].quaternion);
-  	}
-  	*/
-
-	// Check for user input to make move the vehicle
-	if (enableVehicleMesh && enableVehicleBody) {
-		vehicleMesh.position.copy(chassisBody.position);
-		vehicleMesh.quaternion.copy(chassisBody.quaternion);
-		vehicleMesh.position.y -= 0.7;		
-		vehicleMesh.position.z += 0.05;
-		vehicleMesh.rotateZ(Math.PI/2);
-		vehicleMesh.rotateX(Math.PI/2);
-	}
-	
-	// Update target to follow for OrbitController
-	controls.target.copy(vehicleMesh.position);
-	controls.target.y += 2.8;
-	controls.update();
-	
-    // Render(scene, camera)
-  	renderer.render(scene, camera);
-}
-
-/* Test with a boxBody and boxMesh
+	/* Test with a boxBody and boxMesh
 var boxMaterial = new CANNON.Material();
 var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
 var boxBody = new CANNON.Body( {mass: 10, material: boxMaterial} );
@@ -228,7 +157,7 @@ meshes.push(boxMesh);
 scene.add(boxMesh);
 */
 
-/*		Raycast vehicle  	*/
+	/*		Raycast vehicle  	*/
 var chassisShape;
 chassisShape = new CANNON.Box(new CANNON.Vec3(1.6, 0.8, 0.3));
 var chassisBody = new CANNON.Body({ mass: 150 });
@@ -265,7 +194,6 @@ var options = {
     useCustomSlidingRotationalSpeed: true
 };
 
-// Create the vehicle
 vehicle = new CANNON.RaycastVehicle({
     chassisBody: chassisBody,
 });
@@ -310,8 +238,88 @@ world.addEventListener('postStep', function(){
         wheelBody.quaternion.copy(t.quaternion);
     }
 });
-
 vehicle.addToWorld(world);
-
 enableVehicleBody = true;
 
+	// Generate NiceDude
+var i = 0;
+for (var r = -nBlockX/2; r < nBlockX/2; r++){
+	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
+			// Set the position at the center of the block
+		var x = r * blockSizeX + blockSizeX/2;
+		var y = 0.01;
+		var z = c * blockSizeZ + blockSizeZ/2;
+		var theta;
+			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
+			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
+		var side = Math.floor(Math.random() * 4);
+		var direction = Math.floor(Math.random()*2);
+		switch (side){
+			case 0:
+				z = z + blockSizeZ/2 - roadD/2 - sidewalkD/2;
+				theta = (direction ? +Math.PI/2 : -Math.PI/2);
+				break;
+			case 1:
+				x = x + blockSizeX/2 - roadW/2 - sidewalkW/2;
+				theta = (direction ? +Math.PI : 0);
+				break;
+			case 2:
+				z = z - blockSizeZ/2 + roadD/2 + sidewalkD/2;
+				theta = (direction ? -Math.PI/2 : +Math.PI/2);
+				break;
+			case 3:
+				x = x - blockSizeX/2 + roadW/2 + sidewalkW/2;
+				theta = (direction ? 0 : -Math.PI);
+				break;
+		}
+		niceDudes[i] = new NiceDude(x, y, z, theta);
+		scene.add(niceDudes[i].group);
+		i += 1;
+	}
+}
+enableNiceDudeBody = true;
+
+	// Rendering function
+var fixedTimeStep = 1.0/60.0;
+function animate() {
+  	requestAnimationFrame(animate);
+
+  	world.step(fixedTimeStep);
+
+  	//cannonDebugRender.update();
+  	/*
+  	// update cannon world
+  	for (var i = 0; i < bodies.length; i++){
+  		meshes[i].position.copy(bodies[i].position);
+        meshes[i].quaternion.copy(bodies[i].quaternion);
+  	}
+  	*/
+
+	// Check for user input to make move the vehicle
+	if (enableVehicleMesh && enableVehicleBody){
+		vehicleMesh.position.copy(chassisBody.position);
+		vehicleMesh.quaternion.copy(chassisBody.quaternion);
+		vehicleMesh.position.y -= 0.7;		
+		vehicleMesh.position.z += 0.05;
+		vehicleMesh.rotateZ(Math.PI/2);
+		vehicleMesh.rotateX(Math.PI/2);
+
+		CarController();
+	}
+	
+	if (enableNiceDudeBody){
+		for (var i = 0; i < niceDudes.length; i++){
+			niceDudes[i].group.position.copy(niceDudes[i].body.position);
+			niceDudes[i].group.position.y -= 1;
+			//niceDudes[i].group.quaternion.copy(niceDudes[i].body.quaternion);
+		}
+	}
+
+	// Update target to follow for OrbitController
+	controls.target.copy(vehicleMesh.position);
+	controls.target.y += 2.8;
+	controls.update();
+	
+    // Render(scene, camera)
+  	renderer.render(scene, camera);
+}

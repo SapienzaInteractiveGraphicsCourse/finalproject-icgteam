@@ -7,6 +7,7 @@ var nBlockX = 6;
 var nBlockZ = 6;
 var blockSizeX = 30;
 var blockSizeZ = 30;
+var limitH = 3;
 var roadW = 10;
 var roadD = 10;
 var lampDensityW = 1;
@@ -90,17 +91,76 @@ function createBaseBuilding(){
 
 // Return the ground mesh
 function buildGround(){
-	// Ground
-	var geometry = new THREE.PlaneGeometry( (nBlockX)*blockSizeX, (nBlockZ)*blockSizeZ);
-	//var texture = new THREE.TextureLoader().load('images/road_road.jpg');
-	var material = new THREE.MeshPhongMaterial({ 
+	var groundGeometry = new THREE.Geometry();
+	var groundMaterial = new THREE.MeshPhongMaterial({ 
 		color: 0x222222, 
 		shininess: 0,
 		//map: texture
 		dithering: true 
 	});
-	var ground = new THREE.Mesh(geometry, material);
-	ground.lookAt(new THREE.Vector3(0,1,0));
+    
+		// Ground
+	var planeGeometry = new THREE.PlaneGeometry( (nBlockX)*blockSizeX, (nBlockZ)*blockSizeZ);
+	planeGeometry.lookAt(new THREE.Vector3(0,1,0));
+	var planeMesh = new THREE.Mesh(planeGeometry, groundMaterial);
+	groundGeometry.merge(planeMesh.geometry, planeGeometry.matrix);
+	
+	// groundLimits
+	var northLimitGeometry = new THREE.PlaneGeometry((nBlockZ)*blockSizeZ, limitH);
+	northLimitGeometry.rotateY(Math.PI);
+	northLimitGeometry.translate(0, limitH/2-0.1, (nBlockZ * blockSizeZ) / 2.0);
+	var northLimitMesh = new THREE.Mesh(northLimitGeometry, groundMaterial);
+	groundGeometry.merge(northLimitMesh.geometry, northLimitMesh.matrix);
+
+	var southLimitGeometry = new THREE.PlaneGeometry((nBlockZ)*blockSizeZ, limitH);
+	southLimitGeometry.translate(0, limitH/2-0.1, -(nBlockZ * blockSizeZ) / 2.0);
+	var southLimitMesh = new THREE.Mesh(southLimitGeometry, groundMaterial);
+	groundGeometry.merge(southLimitMesh.geometry, southLimitMesh.matrix);
+	
+	var eastLimitGeometry = new THREE.PlaneGeometry((nBlockX)*blockSizeX, limitH);
+	eastLimitGeometry.rotateY(Math.PI/2);
+	eastLimitGeometry.translate(-(nBlockX * blockSizeX) / 2.0, limitH/2-0.1, 0);
+	var eastLimitMesh = new THREE.Mesh(eastLimitGeometry, groundMaterial);
+	groundGeometry.merge(eastLimitMesh.geometry, eastLimitMesh.matrix);
+	
+	var westLimitGeometry = new THREE.PlaneGeometry((nBlockX)*blockSizeX, limitH);
+	westLimitGeometry.rotateY(-Math.PI/2);
+	westLimitGeometry.translate(+(nBlockX * blockSizeX) / 2.0, limitH/2-0.1, 0);
+	var westLimitMesh = new THREE.Mesh(westLimitGeometry, groundMaterial);
+	groundGeometry.merge(westLimitMesh.geometry, westLimitMesh.matrix);
+
+		// BodyGround
+	var northLimitShape = new CANNON.Plane();
+	var northLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+	northLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), Math.PI);
+	northLimitBody.position.set(0, 0, +(nBlockZ * blockSizeZ) / 2.0);
+	northLimitBody.addShape(northLimitShape);
+	world.addBody(northLimitBody);
+
+	var southLimitShape = new CANNON.Plane();
+	var southLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+	southLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), 0);
+	southLimitBody.position.set(0, 0, -(nBlockZ * blockSizeZ) / 2.0);
+	southLimitBody.addShape(southLimitShape);
+	world.addBody(southLimitBody);
+
+	var westLimitShape = new CANNON.Plane();
+	var westLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+	westLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), -Math.PI/2);
+	westLimitBody.position.set(+(nBlockX * blockSizeX) / 2.0, 0, 0);
+	westLimitBody.addShape(westLimitShape);
+	world.addBody(westLimitBody);
+
+	var eastLimitShape = new CANNON.Plane();
+	var eastLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+	eastLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), +Math.PI/2);
+	eastLimitBody.position.set(-(nBlockX * blockSizeX) / 2.0, 0, 0);
+	eastLimitBody.addShape(eastLimitShape);
+	world.addBody(eastLimitBody);
+
+
+	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+
 	return ground;
 }
 
