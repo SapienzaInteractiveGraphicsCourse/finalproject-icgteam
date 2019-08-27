@@ -1,7 +1,7 @@
 /*
 			Z coord
 			^
-			| 
+			|
 			|
 			|
 	--------+-------> X coord
@@ -10,7 +10,6 @@
 			|
 
 */
-
 
     // HTML Listeners
 document.onkeydown = handler;
@@ -25,7 +24,7 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-	// Scene 
+	// Scene
 var scene = new THREE.Scene();
 
 	// Camera
@@ -137,25 +136,6 @@ var niceDudes = new Array(NNiceDudes);
 	// First call render
 animate();
 
-	/* Test with a boxBody and boxMesh
-var boxMaterial = new CANNON.Material();
-var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-var boxBody = new CANNON.Body( {mass: 10, material: boxMaterial} );
-boxBody.addShape(boxShape);
-boxBody.angularVelocity.set(0, 2, 0);
-boxBody.position.set(0, 2, 5);
-bodies.push(boxBody);
-world.add(boxBody);
-
-var boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-var boxMaterial = new THREE.MeshPhongMaterial( {color: 0xffff00, dithering: true} );
-var boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-boxMesh.position.set(0, 2, 5);
-boxMesh.receiveShadow = true;
-boxMesh.castShadow = true;
-meshes.push(boxMesh);
-scene.add(boxMesh);
-*/
 
 	/*		Raycast vehicle  	*/
 var chassisShape;
