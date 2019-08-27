@@ -1,7 +1,7 @@
 /*
 			Z coord
 			^
-			| 
+			|
 			|
 			|
 	--------+-------> X coord
@@ -25,7 +25,7 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-	// Scene 
+	// Scene
 var scene = new THREE.Scene();
 
 	// Camera
@@ -193,17 +193,17 @@ function animate() {
 	if (enableVehicleMesh && enableVehicleBody) {
 		vehicleMesh.position.copy(chassisBody.position);
 		vehicleMesh.quaternion.copy(chassisBody.quaternion);
-		vehicleMesh.position.y -= 0.7;		
+		vehicleMesh.position.y -= 0.7;
 		vehicleMesh.position.z += 0.05;
 		vehicleMesh.rotateZ(Math.PI/2);
 		vehicleMesh.rotateX(Math.PI/2);
 	}
-	
+
 	// Update target to follow for OrbitController
 	controls.target.copy(vehicleMesh.position);
 	controls.target.y += 2.8;
 	controls.update();
-	
+
     // Render(scene, camera)
   	renderer.render(scene, camera);
 }
@@ -314,4 +314,3 @@ world.addEventListener('postStep', function(){
 vehicle.addToWorld(world);
 
 enableVehicleBody = true;
-
