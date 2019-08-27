@@ -25,8 +25,8 @@
 			}
 			body{
 				width: 100%; height: 100%; top: 0; left: 0;
-				background: url(images/html/sfondo.jpg) no-repeat center top; 
-				position: fixed; 
+				background: url(images/html/sfondo.jpg) no-repeat center top;
+				position: fixed;
 				z-index: -1;
 				-webkit-background-size: cover;
 				-moz-background-size: cover;
@@ -115,7 +115,7 @@
 		function addText(text, path_to_font, offset, size = 75, depth = 1){
 			var geometry = new THREE.Object3D();
 			var loader = new THREE.FontLoader();
-			loader.load( path_to_font, 
+			loader.load( path_to_font,
 						function ( font ) {
 							var options = {
 								font: font,
@@ -127,7 +127,7 @@
 								bevelOffset: 1
 							};
 							geometry = new THREE.TextGeometry(text, options);
-							
+
 							// center the geometry
 							// - THREE.TextGeometry isnt centered for unknown reasons. all other geometries are centered
 							geometry.computeBoundingBox();
@@ -138,9 +138,9 @@
 							geometry.vertices.forEach(function(vertex){
 								vertex.sub(center);
 							})
-							
+
 							// create a mesh with it
-							var material = new THREE.MeshPhongMaterial( { color: 0xff0000 });
+							var material = new THREE.MeshPhongMaterial( { color: 0xf4f4f4 });
 							var mesh	= new THREE.Mesh(geometry, material);
 							mesh.scale.multiplyScalar(0.009);
 							mesh.position.y	= offset;
@@ -150,16 +150,7 @@
 		</script>
 		<br><br><br><br>
 		<div id="footer" align="center">
-			<form action="game.html" >
-				<button id="pulsante">Go to game!</button>
-			</form>
-
-			<a href="game.html"><img src="/images/html/play.png" width="82" height="86"></a>
-
+						<a href="game.html"><img src="/images/html/play.png" width="82" height="86"></a>
 		</div>
-
-		
-
 	</body>
-
 </html>
