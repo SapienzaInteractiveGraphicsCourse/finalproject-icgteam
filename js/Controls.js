@@ -67,6 +67,14 @@ function handler(event){
     var down = (event.type == 'keydown');
     if (down){
         switch(event.keyCode){
+            case 27:   // esc
+                blocker.style.display = '-webkit-box';
+                blocker.style.display = '-moz-box';
+                blocker.style.display = 'box';
+
+                instructions.style.display = '';
+                gameRunning = false;
+                break;
             case 81:
                 keyDown[81] = true;
                 break;

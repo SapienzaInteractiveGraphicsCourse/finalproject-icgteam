@@ -11,13 +11,33 @@
 
 */
 
+var gameRunning = false;
+
     // HTML Listeners
 document.onkeydown = handler;
 document.onkeyup = handler;
 
+instructions.addEventListener( 'click', function ( event ) {
+	blocker.style.display = 'none';
+	//instructions.style.display = 'none';
+
+	startCountdown(3);
+
+	gameRunning = true;
+
+	startTimer()
+});
+
+
+function startCountdown(seconds){};
+
+function startTimer(){};
+
+/*
 document.getElementById("backgroundSelect").addEventListener("change", function(){
 	setBackground(document.getElementById("backgroundSelect").value);
 });
+*/
 
 	// Renderer
 var renderer = new THREE.WebGLRenderer();
@@ -97,8 +117,8 @@ var windowResize = new THREEx.WindowResize(renderer, camera);
 	// Stats
 var render_stats = new Stats();
 render_stats.domElement.style.position = 'absolute';
-render_stats.domElement.style.top = '40px';
-render_stats.domElement.style.left = '1px';
+render_stats.domElement.style.top = '3px';
+render_stats.domElement.style.left = '3px';
 render_stats.domElement.style.zIndex = 100;
 document.body.appendChild(render_stats.domElement);
 
@@ -308,42 +328,42 @@ enableNiceDudeBody = true;
 	// Rendering function
 var fixedTimeStep = 1.0/60.0;
 function animate() {
-  	requestAnimationFrame(animate);
+	requestAnimationFrame(animate);
 
-  	world.step(fixedTimeStep);
+	if (gameRunning) {
+	  	world.step(fixedTimeStep);
 
-  	//cannonDebugRender.update();
-  	
-  	/*
-  	// update cannon world
-  	for (var i = 0; i < bodies.length; i++){
-  		meshes[i].position.copy(bodies[i].position);
-        meshes[i].quaternion.copy(bodies[i].quaternion);
-  	}
-  	*/
+	  	//cannonDebugRender.update();
+	  	
+	  	/*
+	  	// update cannon world
+	  	for (var i = 0; i < bodies.length; i++){
+	  		meshes[i].position.copy(bodies[i].position);
+	        meshes[i].quaternion.copy(bodies[i].quaternion);
+	  	}
+	  	*/
 
-	// Check for user input to make move the vehicle
-	if (enableVehicleMesh && enableVehicleBody){
-		vehicleMesh.position.copy(chassisBody.position);
-		vehicleMesh.quaternion.copy(chassisBody.quaternion);
-		vehicleMesh.position.y -= 0.7;		
-		vehicleMesh.position.z += 0.05;
-		vehicleMesh.rotateZ(Math.PI/2);
-		vehicleMesh.rotateX(Math.PI/2);
+		// Check for user input to make move the vehicle
+		if (enableVehicleMesh && enableVehicleBody){
+			vehicleMesh.position.copy(chassisBody.position);
+			vehicleMesh.quaternion.copy(chassisBody.quaternion);
+			vehicleMesh.position.y -= 0.7;		
+			vehicleMesh.position.z += 0.05;
+			vehicleMesh.rotateZ(Math.PI/2);
+			vehicleMesh.rotateX(Math.PI/2);
 
-		CarController();
-	}
+			CarController();
+		}
+		if (enableNiceDudeBody){
+			for (var i = 0; i < niceDudes.length; i++){
+				// The body has to follow the mesh animation
 
-	if (enableNiceDudeBody){
-		for (var i = 0; i < niceDudes.length; i++){
-			// The body has to follow the mesh animation
-
-			// NiceDudes Animation
-			for (var i = 0; i < NNiceDudes; i++)
-				niceDudes[i].animate();
+				// NiceDudes Animation
+				for (var i = 0; i < NNiceDudes; i++)
+					niceDudes[i].animate();
+			}
 		}
 	}
-	
 
 	// Update target to follow for OrbitController
 	controls.target.copy(vehicleMesh.position);
