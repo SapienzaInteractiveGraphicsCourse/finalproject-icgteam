@@ -52,11 +52,41 @@ var wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groun
 });
 world.addContactMaterial(wheelGroundContactMaterial);
 
+// ground
 var groundShape = new CANNON.Plane();
 var groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
 groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/2);
 groundBody.addShape(groundShape);
 world.addBody(groundBody);
+
+// Body limitsGround
+var northLimitShape = new CANNON.Plane();
+var northLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+northLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), Math.PI);
+northLimitBody.position.set(0, 0, +(nBlockZ * blockSizeZ) / 2.0);
+northLimitBody.addShape(northLimitShape);
+world.addBody(northLimitBody);
+
+var southLimitShape = new CANNON.Plane();
+var southLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+southLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), 0);
+southLimitBody.position.set(0, 0, -(nBlockZ * blockSizeZ) / 2.0);
+southLimitBody.addShape(southLimitShape);
+world.addBody(southLimitBody);
+
+var westLimitShape = new CANNON.Plane();
+var westLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+westLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), -Math.PI/2);
+westLimitBody.position.set(+(nBlockX * blockSizeX) / 2.0, 0, 0);
+westLimitBody.addShape(westLimitShape);
+world.addBody(westLimitBody);
+
+var eastLimitShape = new CANNON.Plane();
+var eastLimitBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+eastLimitBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0), +Math.PI/2);
+eastLimitBody.position.set(-(nBlockX * blockSizeX) / 2.0, 0, 0);
+eastLimitBody.addShape(eastLimitShape);
+world.addBody(eastLimitBody);
 
 	// Cannon Debugger
 var cannonDebugRender = new THREE.CannonDebugRenderer(scene, world);
@@ -103,8 +133,12 @@ loader.load("models/pony_cartoon/scene.gltf",
 		}
 );
 	// Ground
-var groundMesh = buildGround();
+var ground = buildGround();
+var groundMesh = ground[0];
 scene.add(groundMesh);
+
+var limitsMesh = ground[1]
+scene.add(limitsMesh);
 
 	// Palaces
 var palacesMesh = buildPalaces();
@@ -130,12 +164,12 @@ scene.add(spotlight);
 
 	// NiceDudes variables
 var enableNiceDudeBody = false;
+var niceDudesAnimationFlag = false;
 var NNiceDudes = nBlockX * nBlockZ;
 var niceDudes = new Array(NNiceDudes);
 
 	// First call render
 animate();
-
 
 	/*		Raycast vehicle  	*/
 var chassisShape;
@@ -227,13 +261,16 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 	for (var c = -nBlockZ/2; c < nBlockZ/2; c++){
 			// Set the position at the center of the block
 		var x = r * blockSizeX + blockSizeX/2;
-		var y = 0.01;
+		var y = 0;
 		var z = c * blockSizeZ + blockSizeZ/2;
 		var theta;
 			// Randomize the position on the sidewalk (0:N, 1:E, 2:S, 3:O)
+			// Randomize the side of the sidewalk (0:N, 1:E, 2:S, 3:O)
 			// Randomize the direction of the niceDude (0:clockwise, 1:anticlockwise)
+		var Xc = x;
+		var Zc = z;
 		var side = Math.floor(Math.random() * 4);
-		var direction = Math.floor(Math.random()*2);
+		var direction = Math.floor(Math.random() * 2);
 		switch (side){
 			case 0:
 				z = z + blockSizeZ/2 - roadD/2 - sidewalkD/2;
@@ -249,11 +286,12 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 				break;
 			case 3:
 				x = x - blockSizeX/2 + roadW/2 + sidewalkW/2;
-				theta = (direction ? 0 : -Math.PI);
+				theta = (direction ? 0 : +Math.PI);
 				break;
 		}
-		niceDudes[i] = new NiceDude(x, y, z, theta);
+		niceDudes[i] = new NiceDude(x, y, z, theta, direction, Xc, Zc);
 		scene.add(niceDudes[i].group);
+
 		i += 1;
 	}
 }
@@ -267,6 +305,7 @@ function animate() {
   	world.step(fixedTimeStep);
 
   	//cannonDebugRender.update();
+  	
   	/*
   	// update cannon world
   	for (var i = 0; i < bodies.length; i++){
@@ -286,20 +325,24 @@ function animate() {
 
 		CarController();
 	}
-	
+
 	if (enableNiceDudeBody){
 		for (var i = 0; i < niceDudes.length; i++){
-			niceDudes[i].group.position.copy(niceDudes[i].body.position);
-			niceDudes[i].group.position.y -= 1;
-			//niceDudes[i].group.quaternion.copy(niceDudes[i].body.quaternion);
+			// The body has to follow the mesh animation
+
+			// NiceDudes Animation
+			for (var i = 0; i < NNiceDudes; i++)
+				niceDudes[i].animate();
 		}
 	}
+	
 
 	// Update target to follow for OrbitController
 	controls.target.copy(vehicleMesh.position);
 	controls.target.y += 2.8;
 	controls.update();
 	
+
     // Render(scene, camera)
   	renderer.render(scene, camera);
 }

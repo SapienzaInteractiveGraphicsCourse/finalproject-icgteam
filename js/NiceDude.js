@@ -1,5 +1,5 @@
 	// Classes for NiceDude
-function NiceDude(x, y, z, theta){
+function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.group = new THREE.Group();
 
 		// Head
@@ -42,20 +42,72 @@ function NiceDude(x, y, z, theta){
 	this.rightShoe = new Shoe("R");
 	this.group.add(this.rightShoe.mesh);
 
-		// Move the niceDude
+		// Center of the block
+	this.Xc = Xc;
+	this.Zc = Zc;
+
+		// 4 lamps position
+	this.lamps = new Array(4);
+	this.lamps[0] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[0].x += -blockSizeX/2 +roadW/2 +sidewalkW/2;
+	this.lamps[0].z += -blockSizeZ/2 +roadD/2 +sidewalkD/2;
+	
+	this.lamps[1] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[1].x += +blockSizeX/2 -roadW/2 -sidewalkW/2;
+	this.lamps[1].z += -blockSizeZ/2 +roadD/2 +sidewalkD/2;
+
+	this.lamps[2] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[2].x += -blockSizeX/2 +roadW/2 +sidewalkW/2;
+	this.lamps[2].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
+
+	this.lamps[3] = new THREE.Vector3(Xc, 0, Zc);
+	this.lamps[3].x += +blockSizeX/2 -roadW/2 -sidewalkW/2;
+	this.lamps[3].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
+		
+		// Place the niceDude
 	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
 
 		// Create niceDude CANNON Body
 	var material = new CANNON.Material();
-	var shape = new CANNON.Box(new CANNON.Vec3(0.2, 1, 0.2));
-	this.body = new CANNON.Body( {mass: 10, material: material} );
+	var shape = new CANNON.Cylinder(0.3, 0.3, 2, 20);
+	this.body = new CANNON.Body( {mass: 0, material: material} );
+	this.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI/2);
+	this.body.position.copy(this.group.position);
 	this.body.addShape(shape);
-	this.body.position.set(x, y+2, z);
+	this.body.collisionResponse = 0;
+	this.body.addEventListener("collide",function(e){
+              console.log("OUCH !!! The niceDude just collided with the vehicle.");
+          });
 	world.addBody(this.body);
 
 		// Light shadows
 	this.group.castShadow = true;
+
+		// Velocity and direction of the animation
+	this.step = 0.006 + 0.001*(Math.floor(Math.random() * 6));
+	this.direction = (direction == 0 ? -1 : +1);	// 0: clockwise, 1: anticlockwise
+
+		// Avoiding Lamps
+	this.targetLamp = undefined;
+	this.avoidingLampFlag = false;
+	
+	/*	show lampSquare position
+	for (var i = 0; i < 4; i++){
+		var g = new THREE.BoxGeometry(1, 1, 1);
+		var m = new THREE.MeshBasicMaterial();
+		var mm = new THREE.Mesh(g, m);
+		mm.position.set(this.lamps[i].x, 0, this.lamps[i].z);
+		scene.add(mm);
+	}
+	
+	var g = new THREE.BoxGeometry(1, 1, 1);
+	var m = new THREE.MeshBasicMaterial();
+	var mm = new THREE.Mesh(g, m);
+	mm.position.set(this.Xc, 0, this.Zc);
+	scene.add(mm);
+	*/	
+
 }
 
 function Head(){
@@ -110,7 +162,6 @@ function Body(){
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
 }
 
-
 function Shoulder(label){
 	var shoulderRadius = 0.1;
 	var shoulderPositionX = 0 + (label == 'L' ? 0.2 : -0.2);	
@@ -131,8 +182,7 @@ function Shoulder(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xff8c33} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
-	
-	}
+}
 
 function Arm(label){
 	var armRadius = 0.07;
@@ -164,7 +214,6 @@ function Leg(label){
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
 }
 
-
 function Shoe(label){
 	var shoeRadius = 0.12;
 	var shoeScaleX = 0.7;
@@ -193,3 +242,49 @@ function Shoe(label){
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
 }
+
+NiceDude.prototype.isNearLamp = function(lamp) {
+	var offset = 1.0;
+	
+	var position = this.group.position;
+	var Xmin = lamp.x - offset;
+	var Xmax = lamp.x + offset;
+	var Zmin = lamp.z - offset;
+	var Zmax = lamp.z + offset;
+	
+	if ( position.x < Xmax && 
+		 position.x > Xmin && 
+		 position.z < Zmax &&
+		 position.z > Zmin )
+		return true;
+
+	return false;
+}
+
+NiceDude.prototype.animate = function() {
+	this.group.translateZ(this.step);
+	this.body.position.copy(this.group.position);
+	this.body.position.y += 1.1;
+
+		// Check niceDude position to avoid lamps
+	if (!this.avoidingLampFlag){
+		for (var i = 0; i < 4; i++){
+			if (this.isNearLamp(this.lamps[i])){
+				// Rotate behind on the same sidewalk
+				//this.group.rotateY(Math.PI);
+					// 		or
+				// Rotate to sidewalk
+				this.targetLamp = this.lamps[i];
+				this.avoidingLampFlag = true;
+				this.group.rotateY(this.direction * Math.PI/4);
+			}
+		}
+	}
+	else if (!(this.isNearLamp(this.targetLamp))){
+		this.group.rotateY(this.direction * Math.PI/4);
+		this.targetLamp = undefined;
+		this.avoidingLampFlag = false;
+	}
+
+}
+
