@@ -1,6 +1,7 @@
 var maxSteerVal = 0.5;
 var maxForce = 200;
-var brakeForce = 10;
+var brakeForce = 15;
+var frictionForce = 1.0;
 
 var keyDown = new Array(320);
 for (var i = 0; i < keyDown.length; i++)
@@ -16,8 +17,8 @@ function CarController(){
         vehicle.applyEngineForce(0, 3);
     }
     if (!keyDown[32]){
-        vehicle.setBrake(0, 0);
-        vehicle.setBrake(0, 1);
+        vehicle.setBrake(frictionForce, 0);
+        vehicle.setBrake(frictionForce, 1);
     }
 
     if (keyDown[81]){ // q
@@ -35,10 +36,18 @@ function CarController(){
         vehicle.setBrake(brakeForce, 1);
     }
     if (keyDown[87]){ // forward
+        vehicle.setBrake(0, 0);
+        vehicle.setBrake(0, 1);
+        if (keyDown[32]){ // space
+            vehicle.setBrake(brakeForce, 0);
+            vehicle.setBrake(brakeForce, 1);
+        }
         vehicle.applyEngineForce(-maxForce, 2);
         vehicle.applyEngineForce(-maxForce, 3);
     }
     if (keyDown[83]){ // backward
+        vehicle.setBrake(0, 0);
+        vehicle.setBrake(0, 1);
         vehicle.applyEngineForce(maxForce, 2);
         vehicle.applyEngineForce(maxForce, 3);
     }
