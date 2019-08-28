@@ -68,6 +68,8 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
 
+	this.isRemoved = false;
+
 		// Create niceDude CANNON Body
 	var material = new CANNON.Material();
 	var shape = new CANNON.Cylinder(0.3, 0.3, 2, 20);
@@ -76,17 +78,19 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.body.position.copy(this.group.position);
 	this.body.addShape(shape);
 	this.body.collisionResponse = 0;
-	this.body.addEventListener("collide",function(e){
-              console.log("OUCH !!! The niceDude just collided with the vehicle.");
-          });
 	world.addBody(this.body);
-
+	this.body.addEventListener("collide",function(e){
+            removeNiceDudeWithBody(e.target);
+        });
 		// Light shadows
 	this.group.castShadow = true;
 
 		// Velocity and direction of the animation
-	this.step = 0.006 + 0.001*(Math.floor(Math.random() * 6));
+	this.step = 0.010 + 0.001*(Math.floor(Math.random() * 4));
 	this.direction = (direction == 0 ? -1 : +1);	// 0: clockwise, 1: anticlockwise
+
+		// Random score in (3, 4, 5)
+	this.score = 3 + (Math.floor(Math.random() * 3));
 
 		// Avoiding Lamps
 	this.targetLamp = undefined;
@@ -262,6 +266,11 @@ NiceDude.prototype.isNearLamp = function(lamp) {
 }
 
 NiceDude.prototype.animate = function() {
+	
+	if (this.isRemoved){
+		return;
+	}
+
 	this.group.translateZ(this.step);
 	this.body.position.copy(this.group.position);
 	this.body.position.y += 1.1;
@@ -284,6 +293,21 @@ NiceDude.prototype.animate = function() {
 		this.group.rotateY(this.direction * Math.PI/4);
 		this.targetLamp = undefined;
 		this.avoidingLampFlag = false;
+	}
+
+}
+
+function removeNiceDudeWithBody(targetBody){
+	for (var i = 0; i < NNiceDudes; i++){
+		if (niceDudes[i].body == targetBody){
+			if (!niceDudes[i].isRemoved){
+				console.log("NiceDude n."+i+" has been killed. ^^");
+				niceDudes[i].isRemoved = true;
+				niceDudes[i].group.position.y = -3;
+				updateScore(niceDudes[i].score);
+			}
+			break;
+		}
 	}
 
 }

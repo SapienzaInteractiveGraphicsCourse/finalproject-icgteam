@@ -7,6 +7,12 @@
 	</head>
 
 	<style>
+		body {
+			margin: 0px;
+		}
+		p { 
+			display: inline 
+		}
 		#blocker {
             position: absolute;
 
@@ -40,12 +46,11 @@
             text-align: center;
 
             cursor: pointer;
-
         }
         #header {
 			position:fixed;
 			left:0px;
-			top:0px;
+			top:50px;
 			height:150px;
 			width:100%;
 		}
@@ -61,12 +66,38 @@
   			font-weight: bold;
   			color : white;
 		}
+		#footer {
+			position:fixed;
+			left:0px;
+			bottom:-50px;
+			height:150px;
+			width:100%;
+			pointer-events:none;
+		}
+		#pointsupdate {
+			font-family: "Times New Roman", Times, serif;
+  			font-size: 60px;
+  			font-weight: bold;
+  			color : green;
+  			padding-left:10px;
+		}
+		#totalscore {
+			font-family: "Times New Roman", Times, serif;
+  			font-size: 60px;
+  			font-weight: bold;
+  			color : yellow;
+		}
 	</style>
 
-	<body style='margin: 0px;'>
+	<body>
 		<div id="header" align="center">
 			<p id="countdown"></p>
 			<p id="timer"></p>
+		</div>
+
+		<div id="footer" align="center">
+			<p id="totalscore"></p>
+			<p id="pointsupdate"></p>
 		</div>
 
 		<!--	Import the libreries 	-->

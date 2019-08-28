@@ -3,8 +3,8 @@ This is a support library that contatins all the directives
 to construct the buildings of the city.
 */
 
-var nBlockX = 6;
-var nBlockZ = 6;
+var nBlockX = 4;
+var nBlockZ = 4;
 var blockSizeX = 30;
 var blockSizeZ = 30;
 var limitH = 1.5;
@@ -13,7 +13,7 @@ var roadD = 10;
 var lampDensityW = 1;
 var lampDensityD = 1;
 var lampH = 3;
-var blockDensity = 5;
+var blockDensity = 1;
 var buildingMaxW = 15;
 var buildingMaxD = 15;
 var sidewalkW = 2;

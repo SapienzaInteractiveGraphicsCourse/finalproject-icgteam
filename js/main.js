@@ -13,7 +13,7 @@
 
 var gameRunning = false;
 var startingTime = 3;
-var playingTime = "00:10";
+var playingTime = "02:00";
 var remainingTime = playingTime;
 var savedTimer;
 var gameScore = 0;
@@ -54,6 +54,7 @@ function startCountdown(startingTime, playingTime){
 		document.getElementById("countdown").style.display = 'none';
 		document.getElementById("timer").innerHTML = playingTime;
 
+		document.getElementById("totalscore").innerHTML = "YOUR SCORE: "+gameScore;
 		startTimer();
 
 	}, (startingTime+1)*1000);
@@ -89,6 +90,23 @@ function startTimer() {
 		}
 		return sec;
 	}
+}
+
+function updateScore(points){
+	var pointsUpdate = document.getElementById("pointsupdate");
+	var totalScore = document.getElementById("totalscore");
+
+	gameScore += points;
+
+	pointsUpdate.innerHTML = (points > 0 ? "+"+points : "-"+points);
+	var start = Date.now();
+	for (var i = 0; i < startingTime; i++){
+		setTimeout(function() {
+			var millis = Date.now() - start;
+			pointsUpdate.innerHTML = "";
+			totalScore.innerHTML = "YOUR SCORE: "+gameScore;
+		}, 500);
+	}	
 }
 
 /*
@@ -392,15 +410,7 @@ function animate() {
 
 	  	world.step(fixedTimeStep);
 
-	  	//cannonDebugRender.update();
-	  	
-	  	/*
-	  	// update cannon world
-	  	for (var i = 0; i < bodies.length; i++){
-	  		meshes[i].position.copy(bodies[i].position);
-	        meshes[i].quaternion.copy(bodies[i].quaternion);
-	  	}
-	  	*/
+		//cannonDebugRender.update();
 
 		// Check for user input to make move the vehicle
 		if (enableVehicleMesh && enableVehicleBody){
@@ -435,3 +445,4 @@ function animate() {
     // Render(scene, camera)
   	renderer.render(scene, camera);
 }
+
