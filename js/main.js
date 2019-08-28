@@ -12,6 +12,11 @@
 */
 
 var gameRunning = false;
+var startingTime = 3;
+var playingTime = "00:10";
+var remainingTime = playingTime;
+var savedTimer;
+var gameScore = 0;
 
     // HTML Listeners
 document.onkeydown = handler;
@@ -21,17 +26,70 @@ instructions.addEventListener( 'click', function ( event ) {
 	blocker.style.display = 'none';
 	//instructions.style.display = 'none';
 
-	startCountdown(3);
-
-	gameRunning = true;
-
-	startTimer()
+	document.getElementById("countdown").innerHTML = "";
+	document.getElementById("countdown").style.display = "";
+	document.getElementById("timer").innerHTML = "";
+	document.getElementById("timer").style.display = "";
+	startCountdown(startingTime, remainingTime);
 });
 
+function startCountdown(startingTime, playingTime){
+	var start = Date.now();
+	for (var i = 0; i < startingTime; i++){
+		setTimeout(function() {
+			var millis = Date.now() - start;
+			var value = (3 - Math.floor(millis/1000));
+			document.getElementById("countdown").innerHTML = value;
+		}, i * 1000);
+	}	
+	setTimeout(function() {
+		var millis = Date.now() - start;
+		var value = (3 - Math.floor(millis/1000));
+		document.getElementById("countdown").innerHTML = "VIA!";
+		gameRunning = true;
+	}, (startingTime)*1000);
 
-function startCountdown(seconds){};
+	setTimeout(function() {
+		var millis = Date.now() - start;
+		document.getElementById("countdown").style.display = 'none';
+		document.getElementById("timer").innerHTML = playingTime;
 
-function startTimer(){};
+		startTimer();
+
+	}, (startingTime+1)*1000);
+};
+
+function startTimer() {
+	if (!gameRunning)
+		return;
+
+	var presentTime = document.getElementById("timer").innerHTML;
+	remainingTime = presentTime;
+	var timeArray = presentTime.split(":");
+	var m = timeArray[0];
+	var s = checkSecond((timeArray[1] - 1));
+	if (s == 59){
+		m = m - 1;
+	}
+ 	if (m < 0){
+ 		alert("TIMER ELAPSED.\n You totalized " + gameScore + " points by killing pedestrians.\n GOOD JOB !");
+ 		gameRunning = false;
+ 		return;
+ 	}
+	document.getElementById('timer').innerHTML = m + ":" + s;
+
+	setTimeout(startTimer, 1000);
+
+	function checkSecond(sec) {
+		if (sec < 10 && sec >= 0) {
+			sec = "0" + sec;
+		} 
+		if (sec < 0) {
+			sec = "59";
+		}
+		return sec;
+	}
+}
 
 /*
 document.getElementById("backgroundSelect").addEventListener("change", function(){
@@ -330,7 +388,8 @@ var fixedTimeStep = 1.0/60.0;
 function animate() {
 	requestAnimationFrame(animate);
 
-	if (gameRunning) {
+	if (gameRunning) {	
+
 	  	world.step(fixedTimeStep);
 
 	  	//cannonDebugRender.update();

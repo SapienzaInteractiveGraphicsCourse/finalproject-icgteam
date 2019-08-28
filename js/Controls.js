@@ -73,6 +73,7 @@ function handler(event){
                 blocker.style.display = 'box';
 
                 instructions.style.display = '';
+
                 gameRunning = false;
                 break;
             case 81:

@@ -42,9 +42,32 @@
             cursor: pointer;
 
         }
+        #header {
+			position:fixed;
+			left:0px;
+			top:0px;
+			height:150px;
+			width:100%;
+		}
+		#countdown {
+			font-family: "Times New Roman", Times, serif;
+  			font-size: 80px;
+  			font-weight: bold;
+			color: red;
+		}
+		#timer {
+			font-family: "Times New Roman", Times, serif;
+  			font-size: 40px;
+  			font-weight: bold;
+  			color : white;
+		}
 	</style>
 
 	<body style='margin: 0px;'>
+		<div id="header" align="center">
+			<p id="countdown"></p>
+			<p id="timer"></p>
+		</div>
 
 		<!--	Import the libreries 	-->
 		<script src="libs/three.min.js"></script>
