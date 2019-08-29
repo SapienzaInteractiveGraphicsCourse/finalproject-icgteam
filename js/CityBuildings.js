@@ -113,7 +113,6 @@ function buildGround(){
 	});
 
 	var limitsMesh = new THREE.Mesh(limitsGeometry, limitsMaterial);
-
 	return [groundMesh, limitsMesh];
 }
 
@@ -193,8 +192,12 @@ function buildSidewalk(){
       }
     }
 
-	var material = new THREE.MeshBasicMaterial({
-        color  : 0x262626
+	// var material = new THREE.MeshBasicMaterial({
+ //        color  : 0x262626
+ //    });
+    var material  = new THREE.MeshLambertMaterial({
+    	color : 0x262626,
+    	vertexColors  : THREE.VertexColors
     });
 
     var sidewalksMesh = new THREE.Mesh(sidewalksGeometry, material );
@@ -250,6 +253,7 @@ function buildSquareLamps(){
 		var lampBody = new CANNON.Body( {mass: 0, material: lampMaterial} );
 		lampBody.addShape(lampShape);
 		lampBody.position.set(lampMesh.position.x, lampMesh.position.y, lampMesh.position.z);
+		lampBody.castShadow = true;//change
 		world.add(lampBody);
 		    
 		// set base position
@@ -280,10 +284,10 @@ function buildSquareLamps(){
     // These are the cumulative geometry
     var lightsGeometry  = new THREE.Geometry();
     var lampsGeometry = new THREE.Geometry();
-    lampsGeometry.castShadow = true;//change
-    lightsGeometry.castShadow = true;//change
-    lampsGeometry.receiveShadow = false;//change
-    lightsGeometry.receiveShadow = false;//change
+    // lampsGeometry.castShadow = true;//change
+    // lightsGeometry.castShadow = true;//change
+    // lampsGeometry.receiveShadow = false;//change
+    // lightsGeometry.receiveShadow = false;//change
 
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
     	for( var blockX = 0; blockX < nBlockX; blockX++){
@@ -331,6 +335,7 @@ function buildSquareLamps(){
     var lightParticles = new THREE.Points( lightsGeometry, material );
     lightParticles.sortParticles = true;
     object3d.add( lightParticles );
+    object3d.castShadow = true;//change
 
     return object3d;
 }

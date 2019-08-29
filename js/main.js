@@ -48,6 +48,7 @@ document.body.appendChild(renderer.domElement);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
+
 	// Scene
 var scene = new THREE.Scene();
 
@@ -131,6 +132,22 @@ document.body.appendChild(render_stats.domElement);
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.maxDistance = 9;
 
+// Demo spotlight
+var spotlight = new THREE.SpotLight( 0xffffff );//change
+spotlight.position.set(40, 40, 20);
+spotlight.castShadow = true;
+scene.add(spotlight);
+
+//Set up shadow properties for the light
+spotlight.shadow.mapSize.width = 2048;  // default
+spotlight.shadow.mapSize.height = 2048; // default
+spotlight.shadow.camera.near = 0.5;       // default
+spotlight.shadow.camera.far = 500;     // default
+
+
+var helper = new THREE.CameraHelper( spotlight.shadow.camera );
+scene.add( helper );
+//End change
 	// Load Texture Vehicle
 var enableVehicleMesh = false;
 var enableVehicleBody = false;
@@ -153,32 +170,38 @@ loader.load("models/pony_cartoon/scene.gltf",
 			console.log("Cannot load the model.");
 		}
 );
+
 	// Ground
 var ground = buildGround();
 var groundMesh = ground[0];
+groundMesh.receiveShadow = true;//change
 scene.add(groundMesh);
 
-var limitsMesh = ground[1]
+var limitsMesh = ground[1];
+limitsMesh.receiveShadow = true;//change
 scene.add(limitsMesh);
 
 	// Palaces
 var palacesMesh = buildPalaces();
+palacesMesh.castShadow = true; //change
 scene.add(palacesMesh);
 
 	// Sidewalks
 var sidewalk = buildSidewalk();
+sidewalk.receiveShadow = true;//change
 scene.add(sidewalk);
 
 	// lamps (not font of light)
 var lamps = buildSquareLamps();
+//lamps.castShadow = true; //change
+lamps.receiveShadow = true;//change
 scene.add(lamps);
 
 	// Demo ambient light
 var ambient = new THREE.AmbientLight( 0xffffff, .5 );
 scene.add( ambient );
 
-	// Demo spotlight
-var spotlight = new THREE.SpotLight( 0xffffff );//change
+	
 // document.getElementById("ShadowX").oninput = function (event) {
 //         shadow_X = this.valueAsNumber;
 //         console.log("X: "+shadow_X);
@@ -191,20 +214,7 @@ var spotlight = new THREE.SpotLight( 0xffffff );//change
 //         shadow_Z = this.valueAsNumber;
 //         console.log("Z: "+shadow_Z);
 //     };
-spotlight.position.set(20, 30, 20);
-spotlight.castShadow = true;
-scene.add(spotlight);
 
-//Set up shadow properties for the light
-spotlight.shadow.mapSize.width = window.innerWidth;  // default
-spotlight.shadow.mapSize.height = window.innerHeight; // default
-spotlight.shadow.camera.near = 0.5;       // default
-spotlight.shadow.camera.far = 500;     // default
-
-
-var helper = new THREE.CameraHelper( spotlight.shadow.camera );
-scene.add( helper );
-//End change
 
 	// NiceDudes variables
 var enableNiceDudeBody = false;

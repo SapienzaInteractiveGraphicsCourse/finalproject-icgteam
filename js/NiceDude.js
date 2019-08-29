@@ -129,8 +129,10 @@ function Head(){
 	
 	this.material = new THREE.MeshBasicMaterial( {color : 0xffc1ae} );
 	
+
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
-	this.mesh.castShadow = true;
+	this.geometry.castShadow = true;
+	
 }
 
 function Neck(){
