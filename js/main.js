@@ -222,7 +222,6 @@ var loader = new THREE.GLTFLoader();
 loader.load("models/pony_cartoon/scene.gltf",
 		function(gltf){		// OnLoad
 			vehicleMesh = gltf.scene;
-			vehicleMesh.rotateZ(Math.PI/2);
 			vehicleMesh.scale.set(0.005, 0.005, 0.005);
 			vehicleMesh.updateMatrix();
 			scene.add(vehicleMesh);
@@ -407,7 +406,6 @@ function animate() {
 	requestAnimationFrame(animate);
 
 	if (gameRunning) {	
-
 	  	world.step(fixedTimeStep);
 
 		//cannonDebugRender.update();
@@ -425,11 +423,10 @@ function animate() {
 		}
 		if (enableNiceDudeBody){
 			for (var i = 0; i < niceDudes.length; i++){
-				// The body has to follow the mesh animation
-
 				// NiceDudes Animation
-				for (var i = 0; i < NNiceDudes; i++)
+				for (var i = 0; i < NNiceDudes; i++){
 					niceDudes[i].animate();
+				}
 			}
 		}
 	}

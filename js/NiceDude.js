@@ -65,7 +65,7 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.lamps[3].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
 		
 		// Place the niceDude
-	this.group.position.set(x, y, z);
+	this.group.position.set(x, y+0.1, z);
 	this.group.rotateY(theta);
 
 	this.isRemoved = false;
@@ -86,8 +86,8 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.group.castShadow = true;
 
 		// Velocity and direction of the animation
-	this.step = 0.010 + 0.001*(Math.floor(Math.random() * 4));
-	this.direction = (direction == 0 ? -1 : +1);	// 0: clockwise, 1: anticlockwise
+	this.step = 0.020 + 0.001*(Math.floor(Math.random() * 4));
+	this.direction = (direction == 0 ? -1 : +1);	// -1: clockwise, 1: anticlockwise
 
 		// Random score in (3, 4, 5)
 	this.score = 3 + (Math.floor(Math.random() * 3));
@@ -267,6 +267,8 @@ NiceDude.prototype.isNearLamp = function(lamp) {
 
 NiceDude.prototype.animate = function() {
 	
+	this.keepInMemory();
+
 	if (this.isRemoved){
 		return;
 	}
@@ -295,6 +297,10 @@ NiceDude.prototype.animate = function() {
 		this.avoidingLampFlag = false;
 	}
 
+}
+
+NiceDude.prototype.keepInMemory = function() {
+	this.body.position.copy(this.body.position);
 }
 
 function removeNiceDudeWithBody(targetBody){
