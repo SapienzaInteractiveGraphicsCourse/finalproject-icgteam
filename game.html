@@ -4,15 +4,17 @@
 		<title>
 			WonderingCity
 		</title>
+
+	
 	</head>
 
+
+	<!-- ShadowX<input id="ShadowX" type="range" min="-200" max="200" step="5" value="0"/>
+	
+	ShadowY<input id="ShadowY" type="range" min="-200" max="200" step="5" value="0"/>
+	
+	ShadowZ<input id="ShadowZ" type="range" min="-200" max="200" step="5" value="0"/> -->
 	<style>
-		body {
-			margin: 0px;
-		}
-		p { 
-			display: inline 
-		}
 		#blocker {
             position: absolute;
 
@@ -46,59 +48,11 @@
             text-align: center;
 
             cursor: pointer;
+
         }
-        #header {
-			position:fixed;
-			left:0px;
-			top:50px;
-			height:150px;
-			width:100%;
-		}
-		#countdown {
-			font-family: "Times New Roman", Times, serif;
-  			font-size: 80px;
-  			font-weight: bold;
-			color: red;
-		}
-		#timer {
-			font-family: "Times New Roman", Times, serif;
-  			font-size: 40px;
-  			font-weight: bold;
-  			color : white;
-		}
-		#footer {
-			position:fixed;
-			left:0px;
-			bottom:-50px;
-			height:150px;
-			width:100%;
-			pointer-events:none;
-		}
-		#pointsupdate {
-			font-family: "Times New Roman", Times, serif;
-  			font-size: 60px;
-  			font-weight: bold;
-  			color : green;
-  			padding-left:10px;
-		}
-		#totalscore {
-			font-family: "Times New Roman", Times, serif;
-  			font-size: 60px;
-  			font-weight: bold;
-  			color : yellow;
-		}
 	</style>
 
-	<body>
-		<div id="header" align="center">
-			<p id="countdown"></p>
-			<p id="timer"></p>
-		</div>
-
-		<div id="footer" align="center">
-			<p id="totalscore"></p>
-			<p id="pointsupdate"></p>
-		</div>
+	<body style='margin: 0px;'>
 
 		<!--	Import the libreries 	-->
 		<script src="libs/three.min.js"></script>
@@ -141,7 +95,7 @@
             <div id="instructions">
                 <span style="font-size:40px">Click to play</span>
                 <br />
-                (W,A,S,D = Move, SPACE = Handbrake, ESC = Pause, Q,E = Reverse the car)
+                (W,A,S,D = Move, SPACE = Handbrake, ESC = Pause)
             </div>
         </div>
 
