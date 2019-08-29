@@ -12,12 +12,7 @@
 */
 
 var gameRunning = false;
-var startingTime = 3;
-var playingTime = "02:00";
-var remainingTime = playingTime;
-var savedTimer;
-var gameScore = 0;
-
+var shadow_Z,shadow_X,shadow_Y;
     // HTML Listeners
 document.onkeydown = handler;
 document.onkeyup = handler;
@@ -26,88 +21,17 @@ instructions.addEventListener( 'click', function ( event ) {
 	blocker.style.display = 'none';
 	//instructions.style.display = 'none';
 
-	document.getElementById("countdown").innerHTML = "";
-	document.getElementById("countdown").style.display = "";
-	document.getElementById("timer").innerHTML = "";
-	document.getElementById("timer").style.display = "";
-	startCountdown(startingTime, remainingTime);
+	startCountdown(3);
+
+	gameRunning = true;
+
+	startTimer()
 });
 
-function startCountdown(startingTime, playingTime){
-	var start = Date.now();
-	for (var i = 0; i < startingTime; i++){
-		setTimeout(function() {
-			var millis = Date.now() - start;
-			var value = (3 - Math.floor(millis/1000));
-			document.getElementById("countdown").innerHTML = value;
-		}, i * 1000);
-	}	
-	setTimeout(function() {
-		var millis = Date.now() - start;
-		var value = (3 - Math.floor(millis/1000));
-		document.getElementById("countdown").innerHTML = "VIA!";
-		gameRunning = true;
-	}, (startingTime)*1000);
 
-	setTimeout(function() {
-		var millis = Date.now() - start;
-		document.getElementById("countdown").style.display = 'none';
-		document.getElementById("timer").innerHTML = playingTime;
+function startCountdown(seconds){};
 
-		document.getElementById("totalscore").innerHTML = "YOUR SCORE: "+gameScore;
-		startTimer();
-
-	}, (startingTime+1)*1000);
-};
-
-function startTimer() {
-	if (!gameRunning)
-		return;
-
-	var presentTime = document.getElementById("timer").innerHTML;
-	remainingTime = presentTime;
-	var timeArray = presentTime.split(":");
-	var m = timeArray[0];
-	var s = checkSecond((timeArray[1] - 1));
-	if (s == 59){
-		m = m - 1;
-	}
- 	if (m < 0){
- 		alert("TIMER ELAPSED.\n You totalized " + gameScore + " points by killing pedestrians.\n GOOD JOB !");
- 		gameRunning = false;
- 		return;
- 	}
-	document.getElementById('timer').innerHTML = m + ":" + s;
-
-	setTimeout(startTimer, 1000);
-
-	function checkSecond(sec) {
-		if (sec < 10 && sec >= 0) {
-			sec = "0" + sec;
-		} 
-		if (sec < 0) {
-			sec = "59";
-		}
-		return sec;
-	}
-}
-
-function updateScore(points){
-	var pointsUpdate = document.getElementById("pointsupdate");
-	var totalScore = document.getElementById("totalscore");
-
-	gameScore += points;
-
-	pointsUpdate.innerHTML = (points > 0 ? "+"+points : "-"+points);
-	var start = Date.now();
-	for (var i = 0; i < startingTime; i++){
-		setTimeout(function() {
-			var millis = Date.now() - start;
-			pointsUpdate.innerHTML = "";
-			totalScore.innerHTML = "YOUR SCORE: "+gameScore;
-		}, 500);
-	}	
-}
+function startTimer(){};
 
 /*
 document.getElementById("backgroundSelect").addEventListener("change", function(){
@@ -119,6 +43,10 @@ document.getElementById("backgroundSelect").addEventListener("change", function(
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+//Shadows
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
 	// Scene
 var scene = new THREE.Scene();
@@ -198,17 +126,6 @@ render_stats.domElement.style.left = '3px';
 render_stats.domElement.style.zIndex = 100;
 document.body.appendChild(render_stats.domElement);
 
-	// BackgroundSelector
-function setBackground(background){
-	if (background == 'null')
-		scene.background = null;
-	else{
-		var format = (background == 'pisa' ? '.png' : '.jpg');
-		var urls = ['px'+format, 'nx'+format, 'py'+format, 'ny'+format, 'pz'+format, 'nz'+format];
-
-		scene.background = new THREE.CubeTextureLoader().setPath('images/background/'+background+'/').load(urls);
-	}
-}
 
 	// Camera Controls
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -222,6 +139,7 @@ var loader = new THREE.GLTFLoader();
 loader.load("models/pony_cartoon/scene.gltf",
 		function(gltf){		// OnLoad
 			vehicleMesh = gltf.scene;
+			vehicleMesh.rotateZ(Math.PI/2);
 			vehicleMesh.scale.set(0.005, 0.005, 0.005);
 			vehicleMesh.updateMatrix();
 			scene.add(vehicleMesh);
@@ -256,14 +174,37 @@ var lamps = buildSquareLamps();
 scene.add(lamps);
 
 	// Demo ambient light
-var ambient = new THREE.AmbientLight( 0xffffff, 0.3 );
+var ambient = new THREE.AmbientLight( 0xffffff, .5 );
 scene.add( ambient );
 
 	// Demo spotlight
-var spotlight = new THREE.SpotLight(0xffffff, 1);
-spotlight.position.set( 0, 100, 0 );
+var spotlight = new THREE.SpotLight( 0xffffff );//change
+// document.getElementById("ShadowX").oninput = function (event) {
+//         shadow_X = this.valueAsNumber;
+//         console.log("X: "+shadow_X);
+//     };
+// document.getElementById("ShadowY").oninput = function (event) {
+//         shadow_Y = this.valueAsNumber;
+//         console.log("Y: "+shadow_Y);
+//     };
+// document.getElementById("ShadowZ").oninput = function (event) {
+//         shadow_Z = this.valueAsNumber;
+//         console.log("Z: "+shadow_Z);
+//     };
+spotlight.position.set(20, 30, 20);
 spotlight.castShadow = true;
 scene.add(spotlight);
+
+//Set up shadow properties for the light
+spotlight.shadow.mapSize.width = window.innerWidth;  // default
+spotlight.shadow.mapSize.height = window.innerHeight; // default
+spotlight.shadow.camera.near = 0.5;       // default
+spotlight.shadow.camera.far = 500;     // default
+
+
+var helper = new THREE.CameraHelper( spotlight.shadow.camera );
+scene.add( helper );
+//End change
 
 	// NiceDudes variables
 var enableNiceDudeBody = false;
@@ -405,10 +346,18 @@ var fixedTimeStep = 1.0/60.0;
 function animate() {
 	requestAnimationFrame(animate);
 
-	if (gameRunning) {	
+	if (gameRunning) {
 	  	world.step(fixedTimeStep);
 
-		//cannonDebugRender.update();
+	  	//cannonDebugRender.update();
+	  	
+	  	/*
+	  	// update cannon world
+	  	for (var i = 0; i < bodies.length; i++){
+	  		meshes[i].position.copy(bodies[i].position);
+	        meshes[i].quaternion.copy(bodies[i].quaternion);
+	  	}
+	  	*/
 
 		// Check for user input to make move the vehicle
 		if (enableVehicleMesh && enableVehicleBody){
@@ -423,10 +372,11 @@ function animate() {
 		}
 		if (enableNiceDudeBody){
 			for (var i = 0; i < niceDudes.length; i++){
+				// The body has to follow the mesh animation
+
 				// NiceDudes Animation
-				for (var i = 0; i < NNiceDudes; i++){
+				for (var i = 0; i < NNiceDudes; i++)
 					niceDudes[i].animate();
-				}
 			}
 		}
 	}
@@ -442,4 +392,3 @@ function animate() {
     // Render(scene, camera)
   	renderer.render(scene, camera);
 }
-

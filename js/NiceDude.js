@@ -1,11 +1,12 @@
 	// Classes for NiceDude
+var flag = 0;
 function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.group = new THREE.Group();
 
 		// Head
 	this.head = new Head();
 	this.group.add(this.head.mesh);
-
+	
 		// Neck
 	this.neck = new Neck();
 	this.group.add(this.neck.mesh);
@@ -65,10 +66,8 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.lamps[3].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
 		
 		// Place the niceDude
-	this.group.position.set(x, y+0.1, z);
+	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
-
-	this.isRemoved = false;
 
 		// Create niceDude CANNON Body
 	var material = new CANNON.Material();
@@ -78,23 +77,25 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.body.position.copy(this.group.position);
 	this.body.addShape(shape);
 	this.body.collisionResponse = 0;
-	world.addBody(this.body);
 	this.body.addEventListener("collide",function(e){
-            removeNiceDudeWithBody(e.target);
-        });
+              console.log("OUCH !!! The niceDude just collided with the vehicle.");
+          });
+	world.addBody(this.body);
+
 		// Light shadows
 	this.group.castShadow = true;
 
 		// Velocity and direction of the animation
-	this.step = 0.020 + 0.001*(Math.floor(Math.random() * 4));
-	this.direction = (direction == 0 ? -1 : +1);	// -1: clockwise, 1: anticlockwise
-
-		// Random score in (3, 4, 5)
-	this.score = 3 + (Math.floor(Math.random() * 3));
+	this.step = 0.006 + 0.001*(Math.floor(Math.random() * 6));
+	this.direction = (direction == 0 ? -1 : +1);	// 0: clockwise, 1: anticlockwise
 
 		// Avoiding Lamps
 	this.targetLamp = undefined;
 	this.avoidingLampFlag = false;
+	// console.log("Position X iniziale "+this.group.position.x);
+	// console.log("Position Y iniziale "+this.group.position.y);
+	// console.log("Position Z iniziale "+this.group.position.z);
+	//console.log(this.group.id);
 	
 	/*	show lampSquare position
 	for (var i = 0; i < 4; i++){
@@ -205,7 +206,7 @@ function Arm(label){
 
 function Leg(label){
 	var legRadius = 0.07;
-	var legHeight = 0.9;
+	var legHeight = 0.85;
 	var legPositionX = 0 + (label == 'L' ? 0.1 : -0.1);	
 	var legPositionY = 0.63;
 	var legPositionZ = 0;
@@ -266,18 +267,24 @@ NiceDude.prototype.isNearLamp = function(lamp) {
 }
 
 NiceDude.prototype.animate = function() {
-	
-	this.keepInMemory();
 
-	if (this.isRemoved){
-		return;
-	}
-
+	// if(this.group.id == 27 && flag<3){
+	// 	console.log(this.group);
+	// 	flag = flag+1;
+	// }
 	this.group.translateZ(this.step);
 	this.body.position.copy(this.group.position);
 	this.body.position.y += 1.1;
+	//this.leftLeg.geometry.rotateX(+0.08);
+	// this.leftLeg.geometry.rotateX(-0.0001);
+	// this.rightLeg.geometry.rotateX(-0.00009);
+	// this.leftShoe.geometry.rotateX(-0.0001);
+	// this.rightShoe.geometry.rotateX(-0.00009);
+	//this.rightArm.position.set(0,0,0);
+
 
 		// Check niceDude position to avoid lamps
+
 	if (!this.avoidingLampFlag){
 		for (var i = 0; i < 4; i++){
 			if (this.isNearLamp(this.lamps[i])){
@@ -285,6 +292,8 @@ NiceDude.prototype.animate = function() {
 				//this.group.rotateY(Math.PI);
 					// 		or
 				// Rotate to sidewalk
+				
+				// JUMP this.group.translateY(1);
 				this.targetLamp = this.lamps[i];
 				this.avoidingLampFlag = true;
 				this.group.rotateY(this.direction * Math.PI/4);
@@ -293,28 +302,18 @@ NiceDude.prototype.animate = function() {
 	}
 	else if (!(this.isNearLamp(this.targetLamp))){
 		this.group.rotateY(this.direction * Math.PI/4);
+		// JUMP this.group.translateY(-1);
 		this.targetLamp = undefined;
 		this.avoidingLampFlag = false;
 	}
-
-}
-
-NiceDude.prototype.keepInMemory = function() {
-	this.body.position.copy(this.body.position);
-}
-
-function removeNiceDudeWithBody(targetBody){
-	for (var i = 0; i < NNiceDudes; i++){
-		if (niceDudes[i].body == targetBody){
-			if (!niceDudes[i].isRemoved){
-				console.log("NiceDude n."+i+" has been killed. ^^");
-				niceDudes[i].isRemoved = true;
-				niceDudes[i].group.position.y = -3;
-				updateScore(niceDudes[i].score);
-			}
-			break;
-		}
-	}
+	// if(flag == -0.0000008 ){
+	// 	while(true){
+	// 		console.log("Ciclo");
+	// 		if(flag >= 0) break;
+	// 		this.leftLeg.geometry.rotateX(+0.0000001);
+	// 		flag= flag+0.0000001;
+	// 	}
+	// }
 
 }
 

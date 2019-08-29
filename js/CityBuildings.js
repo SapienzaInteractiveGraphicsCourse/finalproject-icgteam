@@ -3,8 +3,8 @@ This is a support library that contatins all the directives
 to construct the buildings of the city.
 */
 
-var nBlockX = 4;
-var nBlockZ = 4;
+var nBlockX = 6;
+var nBlockZ = 6;
 var blockSizeX = 30;
 var blockSizeZ = 30;
 var limitH = 1.5;
@@ -13,7 +13,7 @@ var roadD = 10;
 var lampDensityW = 1;
 var lampDensityD = 1;
 var lampH = 3;
-var blockDensity = 1;
+var blockDensity = 5;
 var buildingMaxW = 15;
 var buildingMaxD = 15;
 var sidewalkW = 2;
@@ -51,6 +51,7 @@ function createBaseBuilding(){
 	}
 
 	var meshBuilding = new THREE.Mesh( geometry );
+	geometry.castShadow = true;//change
 	return meshBuilding;
 }
 
@@ -147,6 +148,8 @@ function buildPalaces(){
 				// merge it with cityGeometry - very important for performance
 				buildingMesh.updateMatrix();
 				cityGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );
+				cityGeometry.castShadow = true;//change
+				cityGeometry.receiveShadow = true;//change
 			}
 		}
     }
@@ -199,7 +202,7 @@ function buildSidewalk(){
 }
 
 function buildSquareLamps(){
-	// Useful functino to add a single lamp
+	// Useful function to add a single lamp
 	function addLamp(position){
 		var lightPosition = position.clone();
 		lightPosition.y = sidewalkH+lampH+0.1;
@@ -272,10 +275,16 @@ function buildSquareLamps(){
     var lampGeometry= new THREE.CubeGeometry(1,1,1);
     lampGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
     var lampMesh = new THREE.Mesh(lampGeometry);
+    lampGeometry.castShadow = true;// change
 
     // These are the cumulative geometry
     var lightsGeometry  = new THREE.Geometry();
     var lampsGeometry = new THREE.Geometry();
+    lampsGeometry.castShadow = true;//change
+    lightsGeometry.castShadow = true;//change
+    lampsGeometry.receiveShadow = false;//change
+    lightsGeometry.receiveShadow = false;//change
+
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
     	for( var blockX = 0; blockX < nBlockX; blockX++){
 	        var position = new THREE.Vector3();
