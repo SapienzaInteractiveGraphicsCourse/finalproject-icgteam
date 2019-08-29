@@ -41,7 +41,7 @@ function startCountdown(startingTime, playingTime){
 			var value = (3 - Math.floor(millis/1000));
 			document.getElementById("countdown").innerHTML = value;
 		}, i * 1000);
-	}	
+	}
 	setTimeout(function() {
 		var millis = Date.now() - start;
 		var value = (3 - Math.floor(millis/1000));
@@ -73,10 +73,15 @@ function startTimer() {
 		m = m - 1;
 	}
  	if (m < 0){
- 		alert("TIMER ELAPSED.\n You totalized " + gameScore + " points by killing pedestrians.\n GOOD JOB !");
+		var annulla = window.confirm("TIMER ELAPSED.\n You totalized " + gameScore + " points by killing pedestrians.\n GOOD JOB !.\n\n\n Restart the game?");
+	if (annulla) {
+		 location.reload();
+	}
+	else {
  		gameRunning = false;
- 		return;
+ 	window.open("index.html" ,"_top");
  	}
+}
 	document.getElementById('timer').innerHTML = m + ":" + s;
 
 	setTimeout(startTimer, 1000);
@@ -84,7 +89,7 @@ function startTimer() {
 	function checkSecond(sec) {
 		if (sec < 10 && sec >= 0) {
 			sec = "0" + sec;
-		} 
+		}
 		if (sec < 0) {
 			sec = "59";
 		}
@@ -106,7 +111,7 @@ function updateScore(points){
 			pointsUpdate.innerHTML = "";
 			totalScore.innerHTML = "YOUR SCORE: "+gameScore;
 		}, 500);
-	}	
+	}
 }
 
 /*
@@ -222,6 +227,7 @@ var loader = new THREE.GLTFLoader();
 loader.load("models/pony_cartoon/scene.gltf",
 		function(gltf){		// OnLoad
 			vehicleMesh = gltf.scene;
+			vehicleMesh.rotateZ(Math.PI/2);
 			vehicleMesh.scale.set(0.005, 0.005, 0.005);
 			vehicleMesh.updateMatrix();
 			scene.add(vehicleMesh);
@@ -405,7 +411,8 @@ var fixedTimeStep = 1.0/60.0;
 function animate() {
 	requestAnimationFrame(animate);
 
-	if (gameRunning) {	
+	if (gameRunning) {
+
 	  	world.step(fixedTimeStep);
 
 		//cannonDebugRender.update();
@@ -414,7 +421,7 @@ function animate() {
 		if (enableVehicleMesh && enableVehicleBody){
 			vehicleMesh.position.copy(chassisBody.position);
 			vehicleMesh.quaternion.copy(chassisBody.quaternion);
-			vehicleMesh.position.y -= 0.7;		
+			vehicleMesh.position.y -= 0.7;
 			vehicleMesh.position.z += 0.05;
 			vehicleMesh.rotateZ(Math.PI/2);
 			vehicleMesh.rotateX(Math.PI/2);
@@ -423,10 +430,11 @@ function animate() {
 		}
 		if (enableNiceDudeBody){
 			for (var i = 0; i < niceDudes.length; i++){
+				// The body has to follow the mesh animation
+
 				// NiceDudes Animation
-				for (var i = 0; i < NNiceDudes; i++){
+				for (var i = 0; i < NNiceDudes; i++)
 					niceDudes[i].animate();
-				}
 			}
 		}
 	}
@@ -435,11 +443,10 @@ function animate() {
 	controls.target.copy(vehicleMesh.position);
 	controls.target.y += 2.8;
 	controls.update();
-	
+
 	// Update statistics
 	render_stats.update();
 
     // Render(scene, camera)
   	renderer.render(scene, camera);
 }
-
