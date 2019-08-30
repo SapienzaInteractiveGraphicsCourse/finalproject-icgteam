@@ -279,7 +279,8 @@ function buildSquareLamps(){
     var lampGeometry= new THREE.CubeGeometry(1,1,1);
     lampGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
     var lampMesh = new THREE.Mesh(lampGeometry);
-    lampGeometry.castShadow = true;// change
+    lampMesh.castShadow = true;// change
+    lampMesh.receiveShadow = true;//change
 
     // These are the cumulative geometry
     var lightsGeometry  = new THREE.Geometry();
@@ -288,7 +289,8 @@ function buildSquareLamps(){
     // lightsGeometry.castShadow = true;//change
     // lampsGeometry.receiveShadow = false;//change
     // lightsGeometry.receiveShadow = false;//change
-
+    object3d.castShadow = true;//change
+    object3d.receiveShadow = true;//change
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
     	for( var blockX = 0; blockX < nBlockX; blockX++){
 	        var position = new THREE.Vector3();
@@ -324,6 +326,8 @@ function buildSquareLamps(){
     	vertexColors : THREE.VertexColors
     });
     var lampsMesh = new THREE.Mesh(lampsGeometry, material );
+    lampsMesh.castShadow = true;//change
+    lampsMesh.receiveShadow = true;//change
     object3d.add(lampsMesh);
 
     var texture = new THREE.TextureLoader().load( "./images/lights/lensflare2_alpha.png" );
@@ -335,7 +339,7 @@ function buildSquareLamps(){
     var lightParticles = new THREE.Points( lightsGeometry, material );
     lightParticles.sortParticles = true;
     object3d.add( lightParticles );
-    object3d.castShadow = true;//change
+    
 
     return object3d;
 }

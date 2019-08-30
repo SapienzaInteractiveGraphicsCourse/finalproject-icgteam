@@ -131,8 +131,10 @@ function Head(){
 	
 
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
 	this.geometry.castShadow = true;
-	
+
 }
 
 function Neck(){
@@ -148,6 +150,10 @@ function Neck(){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xffc1ae} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
+	this.mesh.receiveShadow = true;//change
+
 }
 
 function Body(){
@@ -167,6 +173,9 @@ function Body(){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xff8c33} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
+	this.mesh.receiveShadow = true;//change
 }
 
 function Shoulder(label){
@@ -189,6 +198,10 @@ function Shoulder(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xff8c33} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
+	this.mesh.receiveShadow = true;//change
+
 }
 
 function Arm(label){
@@ -204,6 +217,9 @@ function Arm(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0xffc1ae} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
+	this.mesh.receiveShadow = true;//change
 }
 
 function Leg(label){
@@ -219,6 +235,9 @@ function Leg(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0x1b4ef6} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
+	this.mesh.receiveShadow = true;//change
 }
 
 function Shoe(label){
@@ -248,6 +267,9 @@ function Shoe(label){
 	this.material = new THREE.MeshBasicMaterial( {color : 0x402c11} );
 	
 	this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+	this.mesh.castShadow = true;//change
+	this.mesh.receiveShadow = true;//change
 }
 
 NiceDude.prototype.isNearLamp = function(lamp) {

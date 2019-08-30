@@ -184,6 +184,7 @@ scene.add(limitsMesh);
 	// Palaces
 var palacesMesh = buildPalaces();
 palacesMesh.castShadow = true; //change
+palacesMesh.receiveShadow = true;//change
 scene.add(palacesMesh);
 
 	// Sidewalks
@@ -193,7 +194,7 @@ scene.add(sidewalk);
 
 	// lamps (not font of light)
 var lamps = buildSquareLamps();
-//lamps.castShadow = true; //change
+lamps.castShadow = true; //change
 lamps.receiveShadow = true;//change
 scene.add(lamps);
 
@@ -349,6 +350,7 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 		i += 1;
 	}
 }
+console.log(niceDudes[0]);
 enableNiceDudeBody = true;
 
 	// Rendering function
@@ -380,7 +382,9 @@ function animate() {
 
 			CarController();
 		}
+
 		if (enableNiceDudeBody){
+
 			for (var i = 0; i < niceDudes.length; i++){
 				// The body has to follow the mesh animation
 
