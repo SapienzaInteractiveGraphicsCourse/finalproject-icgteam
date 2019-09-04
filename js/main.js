@@ -12,7 +12,12 @@
 */
 
 var gameRunning = false;
-var shadow_Z,shadow_X,shadow_Y;
+var startingTime = 3;
+var playingTime = "02:00";
+var remainingTime = playingTime;
+var savedTimer;
+var gameScore = 0;
+
     // HTML Listeners
 document.onkeydown = handler;
 document.onkeyup = handler;
@@ -20,16 +25,12 @@ document.onkeyup = handler;
 instructions.addEventListener( 'click', function ( event ) {
 	blocker.style.display = 'none';
 
-	startCountdown(3);
-
-	gameRunning = true;
-
-	startTimer()
+	document.getElementById("countdown").innerHTML = "";
+	document.getElementById("countdown").style.display = "";
+	document.getElementById("timer").innerHTML = "";
+	document.getElementById("timer").style.display = "";
+	startCountdown(startingTime, remainingTime);
 });
-
-function startCountdown(seconds){};
-
-function startTimer(){};
 
 function startCountdown(startingTime, playingTime){
 	var start = Date.now();
@@ -111,6 +112,20 @@ function updateScore(points){
 		}, 500);
 	}
 }
+
+/*
+	// BackgroundSelector
+function setBackground(background){
+	if (background == 'null')
+		scene.background = null;
+	else{
+		var format = (background == 'pisa' ? '.png' : '.jpg');
+		var urls = ['px'+format, 'nx'+format, 'py'+format, 'ny'+format, 'pz'+format, 'nz'+format];
+
+		scene.background = new THREE.CubeTextureLoader().setPath('images/background/'+background+'/').load(urls);
+	}
+}
+*/ 
 
 /*
 document.getElementById("backgroundSelect").addEventListener("change", function(){
@@ -223,10 +238,10 @@ spotlight.shadow.mapSize.height = 2048;
 spotlight.shadow.camera.near = 0.5;     
 spotlight.shadow.camera.far = 500;     
 
-
+/*
 var helper = new THREE.CameraHelper( spotlight.shadow.camera );
 scene.add( helper );
-//End change
+*/
 
 	// Load Texture Vehicle
 var enableVehicleMesh = false;
@@ -415,7 +430,6 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 		i += 1;
 	}
 }
-console.log(niceDudes[0]);
 enableNiceDudeBody = true;
 
 	// Rendering function
