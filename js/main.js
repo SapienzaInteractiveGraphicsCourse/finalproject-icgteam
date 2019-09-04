@@ -19,7 +19,6 @@ document.onkeyup = handler;
 
 instructions.addEventListener( 'click', function ( event ) {
 	blocker.style.display = 'none';
-	//instructions.style.display = 'none';
 
 	startCountdown(3);
 
@@ -28,10 +27,90 @@ instructions.addEventListener( 'click', function ( event ) {
 	startTimer()
 });
 
-
 function startCountdown(seconds){};
 
 function startTimer(){};
+
+function startCountdown(startingTime, playingTime){
+	var start = Date.now();
+	for (var i = 0; i < startingTime; i++){
+		setTimeout(function() {
+			var millis = Date.now() - start;
+			var value = (3 - Math.floor(millis/1000));
+			document.getElementById("countdown").innerHTML = value;
+		}, i * 1000);
+	}
+	setTimeout(function() {
+		var millis = Date.now() - start;
+		var value = (3 - Math.floor(millis/1000));
+		document.getElementById("countdown").innerHTML = "VIA!";
+		gameRunning = true;
+	}, (startingTime)*1000);
+
+	setTimeout(function() {
+		var millis = Date.now() - start;
+		document.getElementById("countdown").style.display = 'none';
+		document.getElementById("timer").innerHTML = playingTime;
+
+		document.getElementById("totalscore").innerHTML = "YOUR SCORE: "+gameScore;
+		startTimer();
+
+	}, (startingTime+1)*1000);
+};
+
+function startTimer() {
+	if (!gameRunning)
+		return;
+
+	var presentTime = document.getElementById("timer").innerHTML;
+	remainingTime = presentTime;
+	var timeArray = presentTime.split(":");
+	var m = timeArray[0];
+	var s = checkSecond((timeArray[1] - 1));
+	if (s == 59){
+		m = m - 1;
+	}
+ 	if (m < 0){
+		var annulla = window.confirm("TIMER ELAPSED.\n You totalized " + gameScore + " points by killing pedestrians.\n GOOD JOB !.\n\n\n Restart the game?");
+	if (annulla) {
+		 location.reload();
+	}
+	else {
+ 		gameRunning = false;
+ 	window.open("index.html" ,"_top");
+ 	}
+}
+	document.getElementById('timer').innerHTML = m + ":" + s;
+
+	setTimeout(startTimer, 1000);
+
+	function checkSecond(sec) {
+		if (sec < 10 && sec >= 0) {
+			sec = "0" + sec;
+		}
+		if (sec < 0) {
+			sec = "59";
+		}
+		return sec;
+	}
+}
+
+function updateScore(points){
+	var pointsUpdate = document.getElementById("pointsupdate");
+	var totalScore = document.getElementById("totalscore");
+
+	gameScore += points;
+
+	pointsUpdate.innerHTML = (points > 0 ? "+"+points : "-"+points);
+	var start = Date.now();
+	for (var i = 0; i < startingTime; i++){
+		setTimeout(function() {
+			var millis = Date.now() - start;
+			pointsUpdate.innerHTML = "";
+			totalScore.innerHTML = "YOUR SCORE: "+gameScore;
+		}, 500);
+	}
+}
 
 /*
 document.getElementById("backgroundSelect").addEventListener("change", function(){
@@ -46,7 +125,7 @@ document.body.appendChild(renderer.domElement);
 
 //Shadows
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
 
 
 	// Scene
@@ -133,16 +212,16 @@ var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.maxDistance = 9;
 
 // Demo spotlight
-var spotlight = new THREE.SpotLight( 0xffffff );//change
+var spotlight = new THREE.SpotLight( 0xffffff );
 spotlight.position.set(40, 40, 20);
 spotlight.castShadow = true;
 scene.add(spotlight);
 
 //Set up shadow properties for the light
-spotlight.shadow.mapSize.width = 2048;  // default
-spotlight.shadow.mapSize.height = 2048; // default
-spotlight.shadow.camera.near = 0.5;       // default
-spotlight.shadow.camera.far = 500;     // default
+spotlight.shadow.mapSize.width = 2048; 
+spotlight.shadow.mapSize.height = 2048; 
+spotlight.shadow.camera.near = 0.5;     
+spotlight.shadow.camera.far = 500;     
 
 
 var helper = new THREE.CameraHelper( spotlight.shadow.camera );
@@ -174,48 +253,33 @@ loader.load("models/pony_cartoon/scene.gltf",
 	// Ground
 var ground = buildGround();
 var groundMesh = ground[0];
-groundMesh.receiveShadow = true;//change
+groundMesh.receiveShadow = true;
 scene.add(groundMesh);
 
 var limitsMesh = ground[1];
-limitsMesh.receiveShadow = true;//change
+limitsMesh.receiveShadow = true;
 scene.add(limitsMesh);
 
 	// Palaces
 var palacesMesh = buildPalaces();
-palacesMesh.castShadow = true; //change
-palacesMesh.receiveShadow = true;//change
+palacesMesh.castShadow = true; 
+palacesMesh.receiveShadow = true;
 scene.add(palacesMesh);
 
 	// Sidewalks
 var sidewalk = buildSidewalk();
-sidewalk.receiveShadow = true;//change
+sidewalk.receiveShadow = true;
 scene.add(sidewalk);
 
 	// lamps (not font of light)
 var lamps = buildSquareLamps();
-lamps.castShadow = true; //change
-lamps.receiveShadow = true;//change
+lamps.castShadow = true;
+lamps.receiveShadow = true;
 scene.add(lamps);
 
 	// Demo ambient light
 var ambient = new THREE.AmbientLight( 0xffffff, .5 );
 scene.add( ambient );
-
-	
-// document.getElementById("ShadowX").oninput = function (event) {
-//         shadow_X = this.valueAsNumber;
-//         console.log("X: "+shadow_X);
-//     };
-// document.getElementById("ShadowY").oninput = function (event) {
-//         shadow_Y = this.valueAsNumber;
-//         console.log("Y: "+shadow_Y);
-//     };
-// document.getElementById("ShadowZ").oninput = function (event) {
-//         shadow_Z = this.valueAsNumber;
-//         console.log("Z: "+shadow_Z);
-//     };
-
 
 	// NiceDudes variables
 var enableNiceDudeBody = false;
@@ -375,7 +439,7 @@ function animate() {
 		if (enableVehicleMesh && enableVehicleBody){
 			vehicleMesh.position.copy(chassisBody.position);
 			vehicleMesh.quaternion.copy(chassisBody.quaternion);
-			vehicleMesh.position.y -= 0.7;		
+			vehicleMesh.position.y -= 0.7;
 			vehicleMesh.position.z += 0.05;
 			vehicleMesh.rotateZ(Math.PI/2);
 			vehicleMesh.rotateX(Math.PI/2);
@@ -399,7 +463,7 @@ function animate() {
 	controls.target.copy(vehicleMesh.position);
 	controls.target.y += 2.8;
 	controls.update();
-	
+
 	// Update statistics
 	render_stats.update();
 
