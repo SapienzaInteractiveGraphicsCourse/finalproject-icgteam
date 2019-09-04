@@ -3,9 +3,9 @@ This is a support library that contatins all the directives
 to construct the buildings of the city.
 */
 
-var nBlockX = 2;
-var nBlockZ = 2;
-var blockDensity = 1;
+var nBlockX = 6;
+var nBlockZ = 6;
+var blockDensity = 3;
 var blockSizeX = 30;
 var blockSizeZ = 30;
 var limitH = 1.5;
@@ -194,7 +194,7 @@ function buildSidewalk(){
       }
     }
 
-    var texture = new THREE.TextureLoader().load( "./images/textures/3.png" )
+    var texture = new THREE.TextureLoader().load( "./images/textures/brick_pavement.png" )
 
     // build the sidewalk Mesh
     var material  = new THREE.MeshPhongMaterial({

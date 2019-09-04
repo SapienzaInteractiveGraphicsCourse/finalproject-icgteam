@@ -429,14 +429,21 @@ for (var r = -nBlockX/2; r < nBlockX/2; r++){
 }
 enableNiceDudeBody = true;
 
+
 	// Rendering function
 var fixedTimeStep = 1.0/60.0;
+function time(){
+    return new Date().getTime() / 1000;
+}
+var lastCallTime = time();
+var maxSubSteps = 10;
 function animate() {
 	requestAnimationFrame(animate);
 
-	if (gameRunning) {
-	  	world.step(fixedTimeStep);
+	var timeSinceLastCall = time()-lastCallTime;
+    lastCallTime = time();
 
+	if (gameRunning) {
 	  	//cannonDebugRender.update();
 
 		// Check for user input to make move the vehicle
@@ -452,13 +459,14 @@ function animate() {
 		}
 
 		if (enableNiceDudeBody){
-
 			for (var i = 0; i < niceDudes.length; i++){
 				// NiceDudes Animation
 				for (var i = 0; i < NNiceDudes; i++)
 					niceDudes[i].animate();
 			}
 		}
+
+  		world.step(fixedTimeStep, timeSinceLastCall, maxSubSteps);
 	}
 
 	// Update target to follow for OrbitController
@@ -471,4 +479,5 @@ function animate() {
 
     // Render(scene, camera)
   	renderer.render(scene, camera);
+
 }

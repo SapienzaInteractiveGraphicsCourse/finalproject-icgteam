@@ -347,7 +347,6 @@ NiceDude.prototype.animate = function() {
 		this.targetLamp = undefined;
 		this.avoidingLampFlag = false;
 	}
-
 }
 
 function removeNiceDudeWithBody(targetBody){
