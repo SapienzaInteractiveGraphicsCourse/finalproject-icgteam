@@ -3,8 +3,9 @@ This is a support library that contatins all the directives
 to construct the buildings of the city.
 */
 
-var nBlockX = 6;
-var nBlockZ = 6;
+var nBlockX = 3;
+var nBlockZ = 3;
+var blockDensity = 1;
 var blockSizeX = 30;
 var blockSizeZ = 30;
 var limitH = 1.5;
@@ -13,7 +14,6 @@ var roadD = 10;
 var lampDensityW = 1;
 var lampDensityD = 1;
 var lampH = 3;
-var blockDensity = 5;
 var buildingMaxW = 15;
 var buildingMaxD = 15;
 var sidewalkW = 2;
@@ -32,15 +32,17 @@ function isBottomFace(face){
 }
 
 // Return the basic building
-function createBaseBuilding(){
+function createBaseBuilding(removeTop){
 		// Building
 	var geometry = new THREE.CubeGeometry( 1, 1, 1 );
 	geometry.translate(0, 0.5, 0);
 
-		// Remove texture from top face
-	for (var i = 0; i < 3; i++){
+	if (removeTop){
+			// Remove texture from top face
+		for (var i = 0; i < 3; i++){
 		geometry.faceVertexUvs[0][4][i].set(0, 0);
 		geometry.faceVertexUvs[0][5][i].set(0, 0);
+		}
 	}
 
 		// Replace the bottom face with a fake face
@@ -51,7 +53,7 @@ function createBaseBuilding(){
 	}
 
 	var meshBuilding = new THREE.Mesh( geometry );
-	geometry.castShadow = true;//change
+	geometry.castShadow = true;
 	return meshBuilding;
 }
 
@@ -118,14 +120,14 @@ function buildGround(){
 
 // Return the mesh containing all palaces meshes
 function buildPalaces(){
-	var buildingMesh = createBaseBuilding();
+	var buildingMesh = createBaseBuilding(true);
 	var cityGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
 		for( var blockX = 0; blockX < nBlockX; blockX++){
 			for( var n = 0; n < blockDensity; n++){
 				// set position
-				buildingMesh.position.x = (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-sidewalkW);
-				buildingMesh.position.z = (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-sidewalkD);
+				buildingMesh.position.x = (Math.random()-0.5)*(blockSizeX-buildingMaxW-roadW-1.5*sidewalkW);
+				buildingMesh.position.z = (Math.random()-0.5)*(blockSizeZ-buildingMaxD-roadD-1.5*sidewalkD);
 
 				// add position for the blocks
 				buildingMesh.position.x += (blockX+0.5-nBlockX/2)*blockSizeX;
@@ -147,8 +149,8 @@ function buildPalaces(){
 				// merge it with cityGeometry - very important for performance
 				buildingMesh.updateMatrix();
 				cityGeometry.merge( buildingMesh.geometry, buildingMesh.matrix );
-				cityGeometry.castShadow = true;//change
-				cityGeometry.receiveShadow = true;//change
+				cityGeometry.castShadow = true;
+				cityGeometry.receiveShadow = true;
 			}
 		}
     }
@@ -166,7 +168,7 @@ function buildPalaces(){
 }
 
 function buildSidewalk(){
-	var buildingMesh = createBaseBuilding();
+	var buildingMesh = createBaseBuilding(false);
     var sidewalksGeometry = new THREE.Geometry();
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
       for( var blockX = 0; blockX < nBlockX; blockX++){
@@ -192,11 +194,12 @@ function buildSidewalk(){
       }
     }
 
-	// var material = new THREE.MeshBasicMaterial({
- //        color  : 0x262626
- //    });
-    var material  = new THREE.MeshLambertMaterial({
-    	color : 0x262626,
+    var texture = new THREE.TextureLoader().load( "./images/textures/3.png" )
+
+    // build the sidewalk Mesh
+    var material  = new THREE.MeshPhongMaterial({
+    	//color : 0x00ff00,
+    	map : texture,
     	vertexColors  : THREE.VertexColors
     });
 
@@ -253,9 +256,9 @@ function buildSquareLamps(){
 		var lampBody = new CANNON.Body( {mass: 0, material: lampMaterial} );
 		lampBody.addShape(lampShape);
 		lampBody.position.set(lampMesh.position.x, lampMesh.position.y, lampMesh.position.z);
-		lampBody.castShadow = true;//change
+		lampBody.castShadow = true;
 		world.add(lampBody);
-		    
+
 		// set base position
 		lampMesh.position.copy(position);
 		lampMesh.position.y += sidewalkH;
@@ -279,18 +282,15 @@ function buildSquareLamps(){
     var lampGeometry= new THREE.CubeGeometry(1,1,1);
     lampGeometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.5, 0 ) );
     var lampMesh = new THREE.Mesh(lampGeometry);
-    lampMesh.castShadow = true;// change
-    lampMesh.receiveShadow = true;//change
+    lampMesh.castShadow = true;
+    lampMesh.receiveShadow = true;
 
     // These are the cumulative geometry
     var lightsGeometry  = new THREE.Geometry();
     var lampsGeometry = new THREE.Geometry();
-    // lampsGeometry.castShadow = true;//change
-    // lightsGeometry.castShadow = true;//change
-    // lampsGeometry.receiveShadow = false;//change
-    // lightsGeometry.receiveShadow = false;//change
-    object3d.castShadow = true;//change
-    object3d.receiveShadow = true;//change
+
+    object3d.castShadow = true;
+    object3d.receiveShadow = true;
     for( var blockZ = 0; blockZ < nBlockZ; blockZ++){
     	for( var blockX = 0; blockX < nBlockX; blockX++){
 	        var position = new THREE.Vector3();
@@ -326,8 +326,8 @@ function buildSquareLamps(){
     	vertexColors : THREE.VertexColors
     });
     var lampsMesh = new THREE.Mesh(lampsGeometry, material );
-    lampsMesh.castShadow = true;//change
-    lampsMesh.receiveShadow = true;//change
+    lampsMesh.castShadow = true;
+    lampsMesh.receiveShadow = true;
     object3d.add(lampsMesh);
 
     var texture = new THREE.TextureLoader().load( "./images/lights/lensflare2_alpha.png" );

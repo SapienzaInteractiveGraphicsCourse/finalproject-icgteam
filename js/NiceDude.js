@@ -8,39 +8,39 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	
 		// Neck
 	this.neck = new Neck();
-	this.group.add(this.neck.mesh);
+	this.head.mesh.add(this.neck.mesh);
 
 		// Body
 	this.body = new Body();
-	this.group.add(this.body.mesh);
+	this.neck.mesh.add(this.body.mesh);
 
 		// LeftShoulder
 	this.leftShoulder = new Shoulder("L");
-	this.group.add(this.leftShoulder.mesh);
+	this.body.mesh.add(this.leftShoulder.mesh);
 		// RightShoulder
 	this.rightShoulder = new Shoulder("R");
-	this.group.add(this.rightShoulder.mesh);
+	this.body.mesh.add(this.rightShoulder.mesh);
 		
 		// LeftArm
 	this.leftArm = new Arm("L");
-	this.group.add(this.leftArm.mesh);
+	this.leftShoulder.mesh.add(this.leftArm.mesh);
 		// RightArm
 	this.rightArm = new Arm("R");
-	this.group.add(this.rightArm.mesh);
+	this.rightShoulder.mesh.add(this.rightArm.mesh);
 
 		// LeftLeg
 	this.leftLeg = new Leg("L");
-	this.group.add(this.leftLeg.mesh);
+	this.body.mesh.add(this.leftLeg.mesh);
 		// RightLeg
 	this.rightLeg = new Leg("R");
-	this.group.add(this.rightLeg.mesh);
+	this.body.mesh.add(this.rightLeg.mesh);
 
 		// LeftLeg
 	this.leftShoe = new Shoe("L");
-	this.group.add(this.leftShoe.mesh);
+	this.leftLeg.mesh.add(this.leftShoe.mesh);
 		// RightShoe
 	this.rightShoe = new Shoe("R");
-	this.group.add(this.rightShoe.mesh);
+	this.rightLeg.mesh.add(this.rightShoe.mesh);
 
 		// Center of the block
 	this.Xc = Xc;
@@ -65,24 +65,24 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	this.lamps[3].z += +blockSizeZ/2 -roadD/2 -sidewalkD/2;
 		
 		// Place the niceDude
-	this.group.position.set(x, y+0.1, z);
+	this.group.position.set(x, y, z);
 	this.group.rotateY(theta);
 
 	this.isRemoved = false;
 
 		// Create niceDude CANNON Body
 	var material = new CANNON.Material();
-	var shape = new CANNON.Cylinder(0.3, 0.3, 2, 20);
-	this.body = new CANNON.Body( {mass: 0, material: material} );
-	this.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI/2);
-	this.body.position.copy(this.group.position);
-	this.body.addShape(shape);
-	this.body.collisionResponse = 0;
-	this.body.addEventListener("collide",function(e){
-            //console.log("OUCH !!! The niceDude just collided with the vehicle.");
-          	removeNiceDudeWithBody(e.target);
+	var shape = new CANNON.Box(new CANNON.Vec3(0.15, 0.15, 1));
+	this.cannonBody = new CANNON.Body( {mass: 0, material: material} );
+	this.cannonBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI/2);
+	this.cannonBody.position.copy(this.group.position);
+	this.cannonBody.position.y += 1.3;
+	this.cannonBody.addShape(shape);
+	this.cannonBody.collisionResponse = 0;
+	this.cannonBody.addEventListener("collide",function(e){
+            removeNiceDudeWithBody(e.target);
           });
-	world.addBody(this.body);
+	world.addBody(this.cannonBody);
 
 	// Random score in (3, 4, 5)
 	this.score = 3 + (Math.floor(Math.random() * 3));
@@ -113,6 +113,11 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	mm.position.set(this.Xc, 0, this.Zc);
 	scene.add(mm);
 	*/	
+	this.thetaLeftLeg = 0.008;
+	this.thetaRightLeg = -0.008;
+	this.thetaLeftArm = 0.008;
+	this.thetaRightArm = -0.008;
+	this.thetaMax = 0.400;
 
 }
 
@@ -206,11 +211,11 @@ function Arm(label){
 	var armRadius = 0.07;
 	var armHeight = 0.6;
 	var armPositionX = 0 + (label == 'L' ? 0.19 : -0.19);	
-	var armPositionY = 1.35;
+	var armPositionY = 0.35;
 	var armPositionZ = 0;
 
 	this.geometry = new THREE.CylinderGeometry(armRadius, armRadius, armHeight, 32);
-	this.geometry.translate(armPositionX, armPositionY, armPositionZ);
+	this.geometry.translate(armPositionX, -armPositionY, armPositionZ);
 	
 	this.material = new THREE.MeshBasicMaterial( {color : 0xffc1ae} );
 	
@@ -218,17 +223,19 @@ function Arm(label){
 
 	this.mesh.castShadow = true;
 	this.mesh.receiveShadow = true;
+
+	this.mesh.translateY(0.95 + 2*armPositionY);
 }
 
 function Leg(label){
 	var legRadius = 0.07;
-	var legHeight = 0.85;
+	var legHeight = 0.80;
 	var legPositionX = 0 + (label == 'L' ? 0.1 : -0.1);	
-	var legPositionY = 0.63;
+	var legPositionY = 0.56;
 	var legPositionZ = 0;
 
 	this.geometry = new THREE.CylinderGeometry(legRadius, legRadius, legHeight, 32);
-	this.geometry.translate(legPositionX, legPositionY, legPositionZ);
+	this.geometry.translate(legPositionX, -legPositionY, legPositionZ);
 	
 	this.material = new THREE.MeshBasicMaterial( {color : 0x1b4ef6} );
 	
@@ -236,6 +243,7 @@ function Leg(label){
 
 	this.mesh.castShadow = true;
 	this.mesh.receiveShadow = true;
+	this.mesh.translateY(2*legPositionY);
 }
 
 function Shoe(label){
@@ -243,7 +251,7 @@ function Shoe(label){
 	var shoeScaleX = 0.7;
 	var shoeScaleZ = 1.6;
 	var shoePositionX = 0 + (label == 'L' ? 0.1 : -0.1);	
-	var shoePositionY = 0.1;
+	var shoePositionY = -1.0;
 	var shoePositionZ = 0.08;
 	
 	this.geometry = new THREE.Geometry();
@@ -295,8 +303,29 @@ NiceDude.prototype.animate = function() {
 	}
 
 	this.group.translateZ(this.step);
-	this.body.position.copy(this.group.position);
-	this.body.position.y += 1.1;
+	this.cannonBody.position.copy(this.group.position);
+	this.cannonBody.position.y += 1.3;
+
+		// LeftLeg
+	this.leftLeg.mesh.rotateX(this.thetaLeftLeg);
+	if (this.leftLeg.mesh.rotation.x < -this.thetaMax || this.leftLeg.mesh.rotation.x > this.thetaMax){
+		this.thetaLeftLeg = -this.thetaLeftLeg;
+	}
+		// RightLeg
+	this.rightLeg.mesh.rotateX(this.thetaRightLeg);
+	if (this.rightLeg.mesh.rotation.x < -this.thetaMax || this.rightLeg.mesh.rotation.x > this.thetaMax){
+		this.thetaRightLeg = -this.thetaRightLeg;
+	}
+		// LeftArm
+	this.leftArm.mesh.rotateX(this.thetaLeftLeg);
+	if (this.leftArm.mesh.rotation.x < -this.thetaMax || this.leftArm.mesh.rotation.x > this.thetaMax){
+		this.thetaLeftArm = -this.thetaLeftArm;
+	}
+		// RightArm
+	this.rightArm.mesh.rotateX(this.thetaRightLeg);
+	if (this.rightArm.mesh.rotation.x < -this.thetaMax || this.rightArm.mesh.rotation.x > this.thetaMax){
+		this.thetaRightArm = -this.thetaRightArm;
+	}
 
 		// Check niceDude position to avoid lamps
 	if (!this.avoidingLampFlag){
@@ -306,8 +335,6 @@ NiceDude.prototype.animate = function() {
 				//this.group.rotateY(Math.PI);
 					// 		or
 				// Rotate to sidewalk
-				
-				// JUMP this.group.translateY(1);
 				this.targetLamp = this.lamps[i];
 				this.avoidingLampFlag = true;
 				this.group.rotateY(this.direction * Math.PI/4);
@@ -320,12 +347,12 @@ NiceDude.prototype.animate = function() {
 		this.targetLamp = undefined;
 		this.avoidingLampFlag = false;
 	}
-}
 
+}
 
 function removeNiceDudeWithBody(targetBody){
 	for (var i = 0; i < NNiceDudes; i++){
-		if (niceDudes[i].body == targetBody){
+		if (niceDudes[i].cannonBody == targetBody){
 			if (!niceDudes[i].isRemoved){
 				console.log("NiceDude n."+i+" has been killed. ^^");
 				niceDudes[i].isRemoved = true;

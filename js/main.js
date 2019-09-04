@@ -113,26 +113,6 @@ function updateScore(points){
 	}
 }
 
-/*
-	// BackgroundSelector
-function setBackground(background){
-	if (background == 'null')
-		scene.background = null;
-	else{
-		var format = (background == 'pisa' ? '.png' : '.jpg');
-		var urls = ['px'+format, 'nx'+format, 'py'+format, 'ny'+format, 'pz'+format, 'nz'+format];
-
-		scene.background = new THREE.CubeTextureLoader().setPath('images/background/'+background+'/').load(urls);
-	}
-}
-*/ 
-
-/*
-document.getElementById("backgroundSelect").addEventListener("change", function(){
-	setBackground(document.getElementById("backgroundSelect").value);
-});
-*/
-
 	// Renderer
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -145,6 +125,24 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 	// Scene
 var scene = new THREE.Scene();
+
+	// BackgroundSelector
+function setBackground(background){
+	if (background == 'null')
+		scene.background = null;
+	else{
+		var format = (background == 'pisa' ? '.png' : '.jpg');
+		var urls = ['px'+format, 'nx'+format, 'py'+format, 'ny'+format, 'pz'+format, 'nz'+format];
+
+		scene.background = new THREE.CubeTextureLoader().setPath('images/background/'+background+'/').load(urls);
+	}
+}
+setBackground("mars");
+/*
+document.getElementById("backgroundSelect").addEventListener("change", function(){
+	setBackground(document.getElementById("backgroundSelect").value);
+});
+*/
 
 	// Camera
 var fov = 45;
@@ -221,14 +219,13 @@ render_stats.domElement.style.left = '3px';
 render_stats.domElement.style.zIndex = 100;
 document.body.appendChild(render_stats.domElement);
 
-
 	// Camera Controls
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.maxDistance = 9;
 
-// Demo spotlight
+// Spotlight
 var spotlight = new THREE.SpotLight( 0xffffff );
-spotlight.position.set(40, 40, 20);
+spotlight.position.set(0, 50, 0);//spotlight.position.set(40, 40, 20);
 spotlight.castShadow = true;
 scene.add(spotlight);
 
@@ -251,7 +248,7 @@ var loader = new THREE.GLTFLoader();
 loader.load("models/pony_cartoon/scene.gltf",
 		function(gltf){		// OnLoad
 			vehicleMesh = gltf.scene;
-			vehicleMesh.rotateZ(Math.PI/2);
+			//vehicleMesh.rotateZ(Math.PI/2);
 			vehicleMesh.scale.set(0.005, 0.005, 0.005);
 			vehicleMesh.updateMatrix();
 			scene.add(vehicleMesh);
@@ -294,7 +291,7 @@ lamps.receiveShadow = true;
 scene.add(lamps);
 
 	// Demo ambient light
-var ambient = new THREE.AmbientLight( 0xffffff, .5 );
+var ambient = new THREE.AmbientLight( 0xffffff, .8 );
 scene.add( ambient );
 
 	// NiceDudes variables
@@ -441,14 +438,6 @@ function animate() {
 	  	world.step(fixedTimeStep);
 
 	  	//cannonDebugRender.update();
-	  	
-	  	/*
-	  	// update cannon world
-	  	for (var i = 0; i < bodies.length; i++){
-	  		meshes[i].position.copy(bodies[i].position);
-	        meshes[i].quaternion.copy(bodies[i].quaternion);
-	  	}
-	  	*/
 
 		// Check for user input to make move the vehicle
 		if (enableVehicleMesh && enableVehicleBody){
@@ -465,8 +454,6 @@ function animate() {
 		if (enableNiceDudeBody){
 
 			for (var i = 0; i < niceDudes.length; i++){
-				// The body has to follow the mesh animation
-
 				// NiceDudes Animation
 				for (var i = 0; i < NNiceDudes; i++)
 					niceDudes[i].animate();
