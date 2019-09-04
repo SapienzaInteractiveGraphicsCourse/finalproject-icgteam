@@ -1,0 +1,122 @@
+\documentclass[a4paper,11pt, titlepage]{report}	
+\usepackage[T1]{fontenc}			% codifica dei font
+\usepackage[utf8]{inputenc}			% lettere accentate da tastiera
+\usepackage{gensymb}
+\usepackage[italian]{babel}			% lingua del documento
+\usepackage{lipsum}					% genera testo fittizio
+\usepackage{url}					% per scrivere gli indirizzi Internet
+\usepackage{geometry}
+\usepackage[nouppercase]{frontespizio}	% suftesi or nouppercase
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{xcolor, listings}
+\usepackage{multirow}
+\usepackage[colorlinks]{hyperref}
+\usepackage[square,sort,comma,numbers]{natbib}
+
+
+\geometry{a4paper, top=2cm, bottom=2cm, left=2.5cm, right=2.5cm, heightrounded, bindingoffset=5mm}
+
+\pagestyle{headings}
+
+\linespread{1.25}
+
+\begin{document}
+
+\hypersetup{
+	linkcolor=black,
+	citecolor=black,
+	urlcolor=black
+}
+
+\title{
+	Interactive Graphics\\
+	\large Final Project
+	}
+\author{Nicola Iommazzo 1693395\\
+		Alessandro Basciani 1675251\\
+		Matteo Silvestri 1774987\\ }
+\date{}
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%	\textbf{GRASSETTO}
+%	\texttt{MACCHINA DA SCRIVERE}
+%	\textit{CORSIVO}
+%	\emph{EMPATIZZATO}
+%	'\\' per andare a capo
+%	\lipsum per far comparire testo in latino come segnaposto
+%
+%%%%%%%%%%%
+
+%1 page - M
+\chapter{Introduction}
+	
+	\section{Libreries}
+
+		\subsection{Three.js}
+
+		\subsection{Cannon.js}
+
+%1 page - B
+\chapter{Presentation Layers}
+
+%2 page - N
+\chapter{Game components}
+
+	\section{Vehicle}
+		
+	\section{City Buildings}
+		
+		\subsection{Three.js meshes}
+		
+		\subsection{Cannon.js bodies}
+
+%1 page - B
+\chapter{Hierachical Model}
+	
+	\section{The NiceDude hierarchical model}
+
+%1 page - B
+\chapter{Textures}
+	
+	\section{City building textures}
+
+	\section{Background scene}
+
+%1 page - M
+\chapter{Lights}
+	
+	\section{General Approach}
+
+%1 page - N
+\chapter{User Interaction}
+
+	\section{Vehicle Controller}
+
+%1 page - N
+\chapter{Animations}
+
+	\section{NiceDude movements}
+
+%2 page - M
+\chapter{Conclusion}
+	
+	\section{How to test the project}
+
+	\section{Bugs}
+
+
+\addcontentsline{toc}{part}{\refname}
+\begin{thebibliography}{999}
+	%\bibitem{codice}
+		%cognome n., 
+		%\emph{titolo, sottotitolo},
+		%casa editrice,
+		%anno.
+\end{thebibliography}
+
+\end{document}
