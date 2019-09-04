@@ -272,7 +272,7 @@ var sidewalk = buildSidewalk();
 sidewalk.receiveShadow = true;
 scene.add(sidewalk);
 
-	// lamps (not font of light)
+	// lamps (not source of light)
 var lamps = buildSquareLamps();
 lamps.castShadow = true;
 lamps.receiveShadow = true;
