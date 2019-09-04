@@ -148,6 +148,7 @@ spotlight.shadow.camera.far = 500;     // default
 var helper = new THREE.CameraHelper( spotlight.shadow.camera );
 scene.add( helper );
 //End change
+
 	// Load Texture Vehicle
 var enableVehicleMesh = false;
 var enableVehicleBody = false;
