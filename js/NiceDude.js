@@ -113,6 +113,7 @@ function NiceDude(x, y, z, theta, direction, Xc, Zc){
 	mm.position.set(this.Xc, 0, this.Zc);
 	scene.add(mm);
 	*/	
+	
 	this.thetaLeftLeg = 0.008;
 	this.thetaRightLeg = -0.008;
 	this.thetaLeftArm = 0.008;
